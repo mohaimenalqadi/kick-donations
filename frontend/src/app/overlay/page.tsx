@@ -19,6 +19,7 @@ import ProfessionalTier from '@/components/overlay/ProfessionalTier';
 import CinematicTier from '@/components/overlay/CinematicTier';
 import GoldTier from '@/components/overlay/GoldTier';
 import Leaderboard from '@/components/overlay/Leaderboard';
+import StandbyScreen from '@/components/overlay/StandbyScreen';
 import { api, type Donation } from '@/lib/api';
 import { calculateTier } from '@/lib/tiers';
 
@@ -410,6 +411,13 @@ export default function OverlayPage() {
                             </div>
                         </motion.div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Standby Layer (Kick Green) */}
+            <AnimatePresence>
+                {isUnlocked && !currentDonation && queue.length === 0 && (
+                    <StandbyScreen />
                 )}
             </AnimatePresence>
 
