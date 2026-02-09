@@ -273,9 +273,9 @@ export default function OverlayPage() {
 
     // Render tier component based on donation tier
     const renderDonation = () => {
-        if (!isUnlocked) return null;
+        if (!isUnlocked || !isProcessing) return null;
 
-        const donationToDisplay = currentDonation || latestCompleted;
+        const donationToDisplay = currentDonation;
 
         if (!donationToDisplay) return null;
 
@@ -416,7 +416,7 @@ export default function OverlayPage() {
 
             {/* Standby Layer (Kick Green) */}
             <AnimatePresence>
-                {isUnlocked && !currentDonation && queue.length === 0 && (
+                {isUnlocked && !isProcessing && queue.length === 0 && (
                     <StandbyScreen />
                 )}
             </AnimatePresence>

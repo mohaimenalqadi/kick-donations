@@ -38,16 +38,16 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ topDonor }) => {
                         </div>
 
                         {/* Text Content */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col min-w-0">
                             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] leading-none mb-1">
-                                أفضل متبرع
+                                أفضل الداعمين
                             </span>
                             <div className="flex items-center gap-3">
-                                <span className="text-lg font-black text-white truncate max-w-[120px]">
+                                <span className="text-lg font-black text-white whitespace-nowrap">
                                     {topDonor.donor_name}
                                 </span>
-                                <div className="h-4 w-[1px] bg-white/10" />
-                                <span className="text-lg font-black text-[#03e115]">
+                                <div className="h-4 w-[1px] bg-white/10 shrink-0" />
+                                <span className="text-lg font-black text-[#03e115] shrink-0">
                                     {topDonor.amount} <small className="text-[10px] opacity-70">د.ل</small>
                                 </span>
                             </div>
