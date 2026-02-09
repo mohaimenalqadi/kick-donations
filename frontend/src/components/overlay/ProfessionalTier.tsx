@@ -85,6 +85,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.PROFESSIONAL}
                 opacity={0.6}
+                volume={volume}
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-70" />

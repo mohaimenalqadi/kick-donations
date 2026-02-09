@@ -6,6 +6,7 @@ interface TierBackgroundProps {
     url?: string;
     fallbackUrl: string;
     opacity?: number;
+    volume?: number;
 }
 
 /**
@@ -13,8 +14,16 @@ interface TierBackgroundProps {
  * Handles both video (MP4/WebM) and image (GIF/PNG/JPG) backgrounds.
  * Prioritizes the provided 'url' (from settings) and falls back to 'fallbackUrl'.
  */
-const TierBackground: React.FC<TierBackgroundProps> = ({ url, fallbackUrl, opacity = 0.6 }) => {
+export default function TierBackground({ url, fallbackUrl, opacity = 1, volume = 0 }: TierBackgroundProps) {
     const finalUrl = url || fallbackUrl;
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+
+    // Sync volume with video ref
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.volume = (volume || 80) / 100;
+        }
+    }, [volume]);
 
     // Diagnostic logging
     useEffect(() => {
@@ -51,24 +60,25 @@ const TierBackground: React.FC<TierBackgroundProps> = ({ url, fallbackUrl, opaci
         return lowerUrl.includes('giphy.com') ||
             lowerUrl.includes('tenor.com') ||
             lowerUrl.includes('.gif');
+        lowerUrl.endsWith('.gif');
     }, [finalUrl]);
 
     if (isVideo && !isKnownGif) {
         return (
             <div className="absolute inset-0 z-0 bg-black overflow-hidden">
                 <video
+                    ref={videoRef}
                     key={finalUrl}
+                    src={finalUrl}
                     autoPlay
                     loop
-                    muted
+                    muted={!(volume && volume > 0)}
                     playsInline
                     className="w-full h-full object-cover"
                     style={{ opacity }}
                     onLoadedData={() => console.log('[TierBackground] ✅ Video loaded:', finalUrl)}
-                    onError={(e) => console.error('[TierBackground] ❌ Video failed:', finalUrl, e)}
-                >
-                    <source src={finalUrl} type="video/mp4" />
-                </video>
+                    onError={() => console.error('[TierBackground] ❌ Video failed:', finalUrl)}
+                />
             </div>
         );
     }
@@ -94,4 +104,3 @@ const TierBackground: React.FC<TierBackgroundProps> = ({ url, fallbackUrl, opaci
     );
 };
 
-export default TierBackground;

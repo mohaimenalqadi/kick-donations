@@ -85,6 +85,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.BASIC}
                 opacity={0.6}
+                volume={volume}
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-60" />

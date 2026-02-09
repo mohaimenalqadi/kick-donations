@@ -84,6 +84,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.LEGENDARY}
                 opacity={0.8}
+                volume={volume}
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-90" />

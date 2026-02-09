@@ -85,6 +85,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.MEDIUM}
                 opacity={0.6}
+                volume={volume}
             />
 
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/40 via-transparent to-black opacity-60" />
