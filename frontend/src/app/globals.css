@@ -1,0 +1,834 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --kick-green: #53fc18;
+  --dark-bg: #11111b;
+  --dark-card: #1e1e2e;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Cairo', 'Inter', sans-serif;
+}
+
+body {
+  background: transparent;
+  color: #fff;
+}
+
+.bg-app-dark {
+  background: var(--dark-bg);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .glass {
+    background: rgba(30, 30, 46, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(83, 252, 24, 0.4);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #53fc18, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 text-dark-400 font-bold py-3 px-6 rounded-lg hover:bg-primary-400 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-200 text-white border border-gray-700 py-3 px-6 rounded-lg hover:bg-dark-100 transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-dark-200 rounded-xl p-6 border border-gray-800;
+  }
+}
+
+/* Overlay Specific - Transparent Background for OBS */
+.overlay-container {
+  background: transparent !important;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animation Classes */
+.animate-enter {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.animate-exit {
+  animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Premium Animations & Effects */
+@keyframes mesh-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-mesh {
+  background-size: 200% 200%;
+  animation: mesh-gradient 15s ease infinite;
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(120%) brightness(120%);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes float-ethereal {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(20px, -30px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-float-ethereal {
+  animation: float-ethereal 10s ease-in-out infinite;
+}
+
+/* Tier-specific Mesh Gradients */
+.bg-mesh-basic {
+  background: linear-gradient(135deg, #064e3b 0%, #10b981 50%, #064e3b 100%);
+}
+
+.bg-mesh-medium {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #172554 100%);
+}
+
+.bg-mesh-professional {
+  background: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 50%, #2e1065 100%);
+}
+
+.bg-mesh-cinematic {
+  background: linear-gradient(135deg, #7c2d12 0%, #f97316 50%, #431407 100%);
+}
+
+.bg-mesh-legendary {
+  background: linear-gradient(135deg, #450a0a 0%, #ef4444 50%, #7f1d1d 100%);
+}
+
+/* Tier-specific styles */
+.tier-basic {
+  --tier-color: #4CAF50;
+}
+
+.tier-medium {
+  --tier-color: #2196F3;
+}
+
+.tier-professional {
+  --tier-color: #9C27B0;
+}
+
+.tier-cinematic {
+  --tier-color: #FF9800;
+}
+
+/* Arabic RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Donation Card Styles */
+.donation-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.donation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--tier-color, var(--kick-green));
+}
+
+
+/* Particles container for cinematic tier */
+.particles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--tier-color);
+  border-radius: 50%;
+  animation: particleFloat 3s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(-30px) scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* Status Indicator */
+::status-indicator {
+  @apply fixed top-6 right-6 z-50 pointer-events-none transition-opacity duration-1000;
+}
+
+@keyframes ignition-blast {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    filter: blur(40px) brightness(4) saturate(2);
+  }
+
+  /* 10s Buildup phase (0% - 70%) */
+  5%,
+  65% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 0.8;
+    filter: blur(20px) brightness(1.5) saturate(1.2);
+  }
+
+  68% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 1;
+    filter: blur(5px) brightness(3);
+  }
+
+  /* The actual blast at ~7s (relative to 10s total duration) */
+  70% {
+    transform: scale(3.5);
+    opacity: 1;
+    filter: blur(0px) brightness(2) saturate(1.5);
+  }
+
+  85% {
+    transform: scale(5);
+    opacity: 1;
+    filter: blur(10px) brightness(1.5);
+  }
+
+  100% {
+    transform: scale(12);
+    opacity: 0;
+    filter: blur(150px) brightness(1);
+  }
+}
+
+/* --- 🔥 GOLD TIER: HYPER-SOVEREIGN IGNITION --- */
+@keyframes hyper-ignition {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    filter: blur(40px) brightness(5) saturate(2);
+  }
+
+  /* 3 Pulses during 10s buildup */
+  15%,
+  45%,
+  65% {
+    transform: scale(1.5) rotate(5deg);
+    opacity: 0.9;
+    filter: blur(20px) brightness(2) saturate(1.5);
+    box-shadow: 0 0 100px gold;
+  }
+
+  30%,
+  55% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0.6;
+    filter: blur(10px) brightness(1.2);
+  }
+
+  68% {
+    transform: scale(0.7);
+    opacity: 1;
+    filter: brightness(4);
+  }
+
+  /* MIGHTY BLAST at 7s */
+  70% {
+    transform: scale(5);
+    opacity: 1;
+    filter: blur(0px) brightness(3) saturate(2);
+  }
+
+  100% {
+    transform: scale(15);
+    opacity: 0;
+    filter: blur(200px) brightness(1);
+  }
+}
+
+/* --- 💎 PROFESSIONAL TIER: CRYSTAL MATRIX SURGE --- */
+@keyframes crystal-matrix-surge {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  /* Suspense Buildup: Vertical Bars appearing */
+  10%,
+  65% {
+    transform: scaleY(1);
+    opacity: 0.7;
+    filter: blur(5px) hue-rotate(90deg);
+  }
+
+  /* Compression before Shatter */
+  68% {
+    transform: scaleY(3) scaleX(0.1);
+    opacity: 1;
+    filter: brightness(3) blur(0px);
+  }
+
+  /* SHATTER at 7s */
+  70% {
+    transform: scale(4) rotate(45deg);
+    opacity: 1;
+    filter: blur(2px) contrast(2);
+  }
+
+  100% {
+    transform: scale(10);
+    opacity: 0;
+    filter: blur(100px) hue-rotate(-90deg);
+  }
+}
+
+/* --- 🪐 PROFESSIONAL TIER: NEBULA FUSION --- */
+@keyframes nebula-fusion {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+    filter: blur(30px);
+  }
+
+  /* Suspense: Mysterious swirling orb */
+  40% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+    filter: blur(15px) hue-rotate(45deg);
+    box-shadow: inset 0 0 50px rgba(168, 85, 247, 0.5);
+  }
+
+  /* Implosion before Bloom */
+  65% {
+    transform: scale(0.4) rotate(360deg);
+    opacity: 1;
+    filter: brightness(2) blur(2px);
+  }
+
+  /* BLOOM at 7s */
+  70% {
+    transform: scale(4);
+    opacity: 1;
+    filter: blur(0px) brightness(1.5) saturate(1.5);
+    background: radial-gradient(circle, #fff 0%, #a855f7 40%, #3b82f6 70%, transparent 100%);
+  }
+
+  100% {
+    transform: scale(10);
+    opacity: 0;
+    filter: blur(120px);
+  }
+}
+
+@keyframes nebula-buildup {
+
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg) blur(50px);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.5) rotate(180deg);
+    filter: hue-rotate(90deg) blur(80px);
+  }
+}
+
+@keyframes shockwave {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+    border: 20px solid rgba(255, 255, 255, 1);
+  }
+
+  /* Shockwave triggers towards the end of the 10s */
+  68% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+
+  70% {
+    transform: scale(1);
+    opacity: 1;
+    border: 15px solid rgba(255, 255, 255, 0.9);
+  }
+
+  100% {
+    transform: scale(8);
+    opacity: 0;
+    border: 0px solid rgba(255, 255, 255, 0);
+  }
+}
+
+/* --- ⚛️ PROFESSIONAL TIER: QUANTUM SINGULARITY --- */
+@keyframes quantum-implode {
+  0% {
+    transform: scale(3);
+    opacity: 0;
+    filter: blur(50px) brightness(2);
+  }
+
+  20% {
+    transform: scale(1);
+    opacity: 0.8;
+    filter: blur(20px) brightness(1.5);
+  }
+
+  50% {
+    transform: scale(0.1);
+    opacity: 1;
+    filter: blur(2px) brightness(5);
+  }
+
+  55% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  60% {
+    transform: scale(15);
+    opacity: 1;
+    filter: blur(0px) brightness(2);
+  }
+
+  100% {
+    transform: scale(20);
+    opacity: 0;
+    filter: blur(150px);
+  }
+}
+
+@keyframes crystalline-reveal {
+  0% {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  58% {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotate(180deg) scale(2);
+    opacity: 0;
+  }
+}
+
+.quantum-singularity-effect {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 100px #fff, 0 0 200px #a855f7;
+  animation: quantum-implode 7s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+  z-index: 100;
+}
+
+.crystal-geometry {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border: 4px solid rgba(168, 85, 247, 0.5);
+  transform: rotate(45deg);
+  animation: crystalline-reveal 7s ease-out forwards;
+  z-index: 99;
+}
+
+@keyframes sovereign-aura {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+    box-shadow: 0 0 120px rgba(245, 158, 11, 0.5), inset 0 0 60px rgba(245, 158, 11, 0.3);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+    box-shadow: 0 0 200px rgba(245, 158, 11, 0.8), inset 0 0 120px rgba(245, 158, 11, 0.6);
+  }
+}
+
+@keyframes embers-float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateY(-50vh) scale(1.5);
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translateY(-100vh) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes prism-slide {
+  0% {
+    transform: translate(-20%, -20%) rotate(0deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+
+  100% {
+    transform: translate(120%, 120%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.sovereign-ignition-effect {
+  position: absolute;
+  inset: -500px;
+  background: radial-gradient(circle, #fff 0%, #fbbf24 30%, #f59e0b 60%, transparent 80%);
+  border-radius: 50%;
+  animation: hyper-ignition 10s cubic-bezier(0.1, 0, 0.4, 1) forwards;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: screen;
+}
+
+.crystal-matrix-effect {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.crystal-bar {
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, #a855f7, #3b82f6, transparent);
+  animation: crystal-matrix-surge 7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  filter: blur(2px);
+  opacity: 0.6;
+}
+
+.mystery-fusion-effect {
+  position: absolute;
+  inset: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #a855f7 0%, transparent 70%);
+  animation: nebula-fusion 7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: screen;
+}
+
+/* --- 📋 UNIFIED GLASS MESSAGE CARDS --- */
+.unified-message-card {
+  @apply bg-black/40 backdrop-blur-xl rounded-3xl p-6 border-t border-l border-white/10 shadow-2xl;
+  max-width: 65vw;
+  margin-top: 2rem;
+}
+
+.card-accent-basic {
+  border-bottom: 3px solid #10b981;
+  box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.4);
+}
+
+.card-accent-medium {
+  border-bottom: 3px solid #3b82f6;
+  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.4);
+}
+
+.card-accent-prof {
+  border-bottom: 3px solid #a855f7;
+  box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.4);
+}
+
+.card-accent-gold {
+  border-bottom: 3px solid #fbbf24;
+  box-shadow: 0 10px 30px -10px rgba(251, 191, 36, 0.4);
+}
+
+/* --- 🖼️ UNIQUE PAGE BORDERS --- */
+.tier-border {
+  @apply fixed inset-0 pointer-events-none z-[100];
+}
+
+.border-basic {
+  border: 4px solid rgba(16, 185, 129, 0.3);
+  box-shadow: inset 0 0 50px rgba(16, 185, 129, 0.1);
+}
+
+.border-medium {
+  border: 6px solid rgba(59, 130, 246, 0.4);
+  box-shadow: inset 0 0 80px rgba(59, 130, 246, 0.2);
+  animation: border-pulse 4s infinite;
+}
+
+.border-prof {
+  border: 8px solid transparent;
+  border-image: linear-gradient(45deg, #a855f7, #3b82f6) 1;
+  box-shadow: inset 0 0 100px rgba(168, 85, 247, 0.2);
+  animation: border-drift 10s infinite alternate;
+}
+
+.border-gold {
+  border: 12px solid #fbbf24;
+  box-shadow: inset 0 0 150px rgba(251, 191, 36, 0.3), 0 0 50px gold;
+  animation: border-liquid 8s infinite;
+}
+
+@keyframes border-pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes border-drift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(90deg);
+  }
+}
+
+@keyframes border-liquid {
+  0% {
+    clip-path: inset(0 0 0 0);
+  }
+
+  25% {
+    clip-path: inset(2px 0 0 0);
+  }
+
+  50% {
+    clip-path: inset(0 2px 0 0);
+  }
+
+  75% {
+    clip-path: inset(0 0 2px 0);
+  }
+
+  100% {
+    clip-path: inset(0 0 0 2px);
+  }
+}
+
+@keyframes text-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: text-shimmer 3s infinite linear;
+}
+
+.nebula-effect {
+  position: absolute;
+  inset: -100px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 70%);
+  animation: nebula-buildup 10s linear infinite;
+  pointer-events: none;
+  z-index: 45;
+}
+
+.shockwave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: shockwave 10s cubic-bezier(0, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  z-index: 49;
+}
+
+.sovereign-glow {
+  position: absolute;
+  inset: -50px;
+  border-radius: 50%;
+  animation: sovereign-aura 8s infinite ease-in-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Custom Text Shadows for readability without cards */
+.text-sovereign-shadow {
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 0, 0, 0.7), 0 0 100px rgba(0, 0, 0, 0.5);
+}
+
+.text-glow-subtle {
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.text-professional-glow {
+  text-shadow:
+    0 0 20px rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(168, 85, 247, 0.8),
+    0 0 80px rgba(59, 130, 246, 0.6);
+}
+
+.professional-backlight {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 70%);
+  filter: blur(40px);
+}
+
+.sovereign-embers-loop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.sovereign-embers-loop::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: gold;
+  border-radius: 50%;
+  filter: blur(2px);
+  box-shadow: 0 0 10px gold;
+  animation: embers-float 8s infinite ease-in;
+  opacity: 0;
+  left: var(--x, 50%);
+}
+
+.prism-drift-loop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(45deg, rgba(168, 85, 247, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  animation: prism-slide 15s linear infinite;
+}
