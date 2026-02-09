@@ -356,8 +356,8 @@ export default function OverlayPage() {
                                         <Play className="text-[#0a0a0a] ml-1" size={32} />
                                     </div>
                                 </div>
-                                <h2 className="text-4xl font-black text-white italic tracking-tighter">
-                                    KICK<span className="text-[#03e115]">PAY</span> OVERLAY
+                                <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">
+                                    {settings?.site_title?.split(/(?=[A-Z])/).map((part: string, i: number) => i === settings.site_title.split(/(?=[A-Z])/).length - 1 ? <span key={i} className="text-[#03e115]">{part}</span> : part)} OVERLAY
                                 </h2>
                                 <p className="text-gray-400 font-bold mt-2">انقر لبدء تشغيل التنبيهات والصوت</p>
                             </div>

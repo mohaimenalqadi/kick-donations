@@ -87,6 +87,8 @@ export default function SettingsPage() {
                 setSettings(localSettings);
                 setShowSavedMsg(true);
                 setTimeout(() => setShowSavedMsg(false), 3000);
+                // Trigger title update
+                window.dispatchEvent(new CustomEvent('settingsUpdated', { detail: localSettings }));
             }
         } catch (error) {
             console.error('Failed to update settings:', error);

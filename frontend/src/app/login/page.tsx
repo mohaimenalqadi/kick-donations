@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Zap, Eye, EyeOff, AlertCircle } from 'lucide-react';
@@ -14,6 +14,21 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isSetup, setIsSetup] = useState(false);
+    const [siteTitle, setSiteTitle] = useState('KickPay');
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await api.getSettings();
+                if (res.settings?.site_title) {
+                    setSiteTitle(res.settings.site_title);
+                }
+            } catch (err) {
+                console.error('Failed to fetch settings:', err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,10 +88,10 @@ export default function LoginPage() {
                     >
                         <Zap className="w-10 h-10 text-primary-500" />
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                        Kick <span className="text-gradient">Donations</span>
+                    <h1 className="text-3xl font-black italic tracking-tighter text-white mb-2">
+                        {siteTitle.split(/(?=[A-Z])/).map((part, i) => i === siteTitle.split(/(?=[A-Z])/).length - 1 ? <span key={i} className="text-[#03e115]">{part}</span> : part)}
                     </h1>
-                    <p className="text-gray-400">منصة تبرعات البث المباشر</p>
+                    <p className="text-gray-400 font-bold uppercase text-xs tracking-[0.2em]">منصة تبرعات البث المباشر</p>
                 </div>
 
                 {/* Login Form */}

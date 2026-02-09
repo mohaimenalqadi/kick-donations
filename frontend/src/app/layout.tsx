@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import TitleManager from '@/components/TitleManager';
 
 export const metadata: Metadata = {
     title: 'Kick Donations - منصة تبرعات البث المباشر',
@@ -17,6 +18,7 @@ export default function RootLayout({
     return (
         <html lang="ar" dir="rtl">
             <body className="min-h-screen">
+                <TitleManager />
                 {children}
             </body>
         </html>
