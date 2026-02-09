@@ -100,3 +100,24 @@ BEGIN
     ) totals;
 END;
 $$ LANGUAGE plpgsql;
+-- Tier settings table (if not exists)
+CREATE TABLE IF NOT EXISTS tier_settings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tier_key VARCHAR(20) UNIQUE NOT NULL,
+    label VARCHAR(50) NOT NULL,
+    min_amount DECIMAL(10,2) NOT NULL,
+    color VARCHAR(10) DEFAULT '#03e115',
+    duration INTEGER DEFAULT 10000,
+    background_url TEXT,
+    sound_url TEXT,
+    volume INTEGER DEFAULT 80,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ensure volume column exists if table was already there
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tier_settings' AND column_name='volume') THEN
+        ALTER TABLE tier_settings ADD COLUMN volume INTEGER DEFAULT 80;
+    END IF;
+END $$;

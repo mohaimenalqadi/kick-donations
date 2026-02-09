@@ -13,13 +13,14 @@ interface CinematicTierProps {
     onComplete: () => void;
     soundUrl?: string;
     backgroundUrl?: string;
+    volume?: number;
 }
 
 /**
  * CINEMATIC TIER (100 - 499 LYD)
  * High-impact, wide-screen aesthetic. Now with Munancho GIF.
  */
-export default function CinematicTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl }: CinematicTierProps) {
+export default function CinematicTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: CinematicTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
 
@@ -38,7 +39,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.CINEMATIC;
         audioManager.preload('cinematic_alert', alertSound);
-        audioManager.play('cinematic_alert', { volume: 0.7 });
+        audioManager.play('cinematic_alert', { volume: (volume / 100) });
 
         // Phase 1: High-Duration Buildup (10s)
         const nameTimer = setTimeout(() => setShowName(true), 10000);
@@ -54,7 +55,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
-    }, [amount, count, soundUrl]);
+    }, [amount, count, soundUrl, volume]);
 
     return (
         <motion.div

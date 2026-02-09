@@ -14,13 +14,14 @@ interface ProfessionalTierProps {
     onComplete: () => void;
     soundUrl?: string;
     backgroundUrl?: string;
+    volume?: number;
 }
 
 /**
  * PROFESSIONAL TIER (50 - 99 LYD)
  * Sleek, professional aesthetic with glassmorphism. Now with Munancho GIF.
  */
-export default function ProfessionalTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl }: ProfessionalTierProps) {
+export default function ProfessionalTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: ProfessionalTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
@@ -40,7 +41,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.PROFESSIONAL;
         audioManager.preload('prof_alert', alertSound);
-        audioManager.play('prof_alert', { volume: 0.6 });
+        audioManager.play('prof_alert', { volume: (volume / 100) });
 
         // Phase 1: Mystery Entry Buildup (7s)
         const nameTimer = setTimeout(() => {
@@ -59,7 +60,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
-    }, [amount, count, soundUrl]);
+    }, [amount, count, soundUrl, volume]);
 
     return (
         <motion.div

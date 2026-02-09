@@ -257,6 +257,14 @@ export default function OverlayPage() {
         };
     }, [isUnlocked, fetchInitialState]);
 
+    // Sync global mute setting
+    useEffect(() => {
+        if (settings) {
+            console.log('🔇 Syncing global mute:', settings.mute_overlay);
+            audioManager.setMuted(!!settings.mute_overlay);
+        }
+    }, [settings?.mute_overlay]);
+
     const handleStartOverlay = async () => {
         await audioManager.unlock();
         setIsUnlocked(true);
@@ -278,7 +286,7 @@ export default function OverlayPage() {
             tierKey: donationToDisplay.tier,
             foundSettings: !!currentTierSettings,
             bgInSettings: currentTierSettings?.background_url,
-            bgInDonation: donationToDisplay.background_url
+            volume: currentTierSettings?.volume || 80
         });
 
         const props = {
@@ -288,6 +296,7 @@ export default function OverlayPage() {
             duration: donationToDisplay.duration,
             soundUrl: currentTierSettings?.sound_url || donationToDisplay.sound_url,
             backgroundUrl: currentTierSettings?.background_url || donationToDisplay.background_url,
+            volume: currentTierSettings?.volume || 80,
             onComplete: handleDonationComplete,
         };
 

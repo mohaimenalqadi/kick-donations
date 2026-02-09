@@ -13,13 +13,14 @@ interface GoldTierProps {
     onComplete: () => void;
     soundUrl?: string;
     backgroundUrl?: string;
+    volume?: number;
 }
 
 /**
  * GOLD TIER (500+ LYD) - THE ULTIMATE ALERT
  * Premium, suspenseful, and absolutely extraordinary.
  */
-export default function GoldTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl }: GoldTierProps) {
+export default function GoldTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: GoldTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
@@ -40,7 +41,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.LEGENDARY;
         audioManager.preload('gold_alert', alertSound);
-        audioManager.play('gold_alert', { volume: 0.8 });
+        audioManager.play('gold_alert', { volume: (volume / 100) });
 
         // Phase 1: Ultimate Suspense (12s)
         const overlayTimer = setTimeout(() => setShowOverlay(true), 12000);
@@ -58,7 +59,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
-    }, [amount, count, soundUrl]);
+    }, [amount, count, soundUrl, volume]);
 
     return (
         <motion.div

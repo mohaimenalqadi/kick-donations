@@ -14,13 +14,14 @@ interface MediumTierProps {
     onComplete: () => void;
     soundUrl?: string;
     backgroundUrl?: string;
+    volume?: number;
 }
 
 /**
  * MEDIUM TIER (10 - 49 LYD)
  * Modern, clean, and interactive.
  */
-export default function MediumTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl }: MediumTierProps) {
+export default function MediumTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: MediumTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
@@ -40,7 +41,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.MEDIUM;
         audioManager.preload('medium_alert', alertSound);
-        audioManager.play('medium_alert', { volume: 0.5 });
+        audioManager.play('medium_alert', { volume: (volume / 100) });
 
         // Phase 1: Entry Buildup (5s for Medium)
         const nameTimer = setTimeout(() => {
@@ -59,7 +60,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
-    }, [amount, count, soundUrl]);
+    }, [amount, count, soundUrl, volume]);
 
     return (
         <motion.div
