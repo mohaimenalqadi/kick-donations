@@ -22,9 +22,14 @@ async function buildServer() {
 
     // Register Plugins
     await fastify.register(cors, {
-        origin: true,
+        origin: [
+            'http://localhost:3000',
+            'https://kick-donations.vercel.app',
+            process.env.CORS_ORIGIN
+        ].filter(Boolean),
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
     });
 
     await fastify.register(cookie, {
