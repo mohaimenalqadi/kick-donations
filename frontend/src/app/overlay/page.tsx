@@ -270,15 +270,31 @@ export default function OverlayPage() {
 
         if (!donationToDisplay) return null;
 
+        // Match settings by tier key
+        const currentTierSettings = tierSettings.find(t => t.tier_key === donationToDisplay.tier);
+
+        console.log('[Overlay] Rendering donation:', {
+            donor: donationToDisplay.donor_name,
+            tierKey: donationToDisplay.tier,
+            foundSettings: !!currentTierSettings,
+            bgInSettings: currentTierSettings?.background_url,
+            bgInDonation: donationToDisplay.background_url
+        });
+
         const props = {
             donorName: donationToDisplay.donor_name,
             amount: donationToDisplay.amount,
             message: donationToDisplay.message,
             duration: donationToDisplay.duration,
-            soundUrl: donationToDisplay.sound_url,
-            backgroundUrl: donationToDisplay.background_url,
+            soundUrl: currentTierSettings?.sound_url || donationToDisplay.sound_url,
+            backgroundUrl: currentTierSettings?.background_url || donationToDisplay.background_url,
             onComplete: handleDonationComplete,
         };
+
+        console.log('[Overlay] Final Props for Tier:', {
+            tier: currentTierSettings?.tier_key,
+            backgroundUrl: props.backgroundUrl
+        });
 
         const uniqueKey = `donation-${donationToDisplay.id || Date.now()}`;
 
