@@ -65,6 +65,15 @@ async function buildServer() {
     fastify.register(tierSettingsRoutes, { prefix: '/api/tier-settings' });
     fastify.register(donationRoutes, { prefix: '/api/donations' });
 
+    // Root route
+    fastify.get('/', async () => {
+        return {
+            message: 'Kick Donation API is running!',
+            version: '1.0.0',
+            status: 'healthy'
+        };
+    });
+
     // Health check
     fastify.get('/health', async () => {
         return { status: 'ok', timestamp: new Date().toISOString() };
