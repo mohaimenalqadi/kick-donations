@@ -22,11 +22,24 @@ async function buildServer() {
 
     // Register Plugins
     await fastify.register(cors, {
-        origin: [
-            'http://localhost:3000',
-            'https://kick-donations.vercel.app',
-            process.env.CORS_ORIGIN
-        ].filter(Boolean),
+        origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps, curl, etc.)
+            if (!origin) return callback(null, true);
+
+            // Allow localhost
+            if (origin.includes('localhost:3000')) return callback(null, true);
+
+            // Allow all Vercel deployments (production and preview)
+            if (origin.endsWith('.vercel.app')) return callback(null, true);
+
+            // Allow custom CORS_ORIGIN from env
+            if (process.env.CORS_ORIGIN && origin === process.env.CORS_ORIGIN) {
+                return callback(null, true);
+            }
+
+            // Reject all other origins
+            callback(new Error('Not allowed by CORS'));
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
