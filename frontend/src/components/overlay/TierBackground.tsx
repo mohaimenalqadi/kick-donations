@@ -22,7 +22,20 @@ const TierBackground: React.FC<TierBackgroundProps> = ({ url, fallbackUrl, opaci
         return lowerUrl.endsWith('.mp4') ||
             lowerUrl.endsWith('.webm') ||
             lowerUrl.endsWith('.ogg') ||
-            lowerUrl.includes('pixabay.com/video'); // Pixabay URLs often don't have typical extensions
+            lowerUrl.includes('pixabay.com/video') ||
+            lowerUrl.includes('vimeo.com') ||
+            lowerUrl.includes('youtube.com/embed');
+    }, [finalUrl]);
+
+    const isImage = useMemo(() => {
+        const lowerUrl = finalUrl.toLowerCase();
+        return lowerUrl.endsWith('.gif') ||
+            lowerUrl.endsWith('.png') ||
+            lowerUrl.endsWith('.jpg') ||
+            lowerUrl.endsWith('.jpeg') ||
+            lowerUrl.endsWith('.webp') ||
+            lowerUrl.includes('giphy.com/media') ||
+            lowerUrl.includes('tenor.com/view');
     }, [finalUrl]);
 
     if (isVideo) {
