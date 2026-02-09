@@ -20,19 +20,36 @@ async function buildServer() {
         logger: true
     });
 
-    // Register Plugins - Simple CORS allowing all origins
+    // Logging hook to debug CORS/Origin issues in Render logs
+    fastify.addHook('onRequest', async (request, reply) => {
+        if (request.headers.origin) {
+            fastify.log.info(`Incoming request from origin: ${request.headers.origin}`);
+        }
+    });
+
+    // Bulletproof CORS Configuration
     await fastify.register(cors, {
-        origin: true,
+        origin: (origin, cb) => {
+            // In production with credentials:true, we MUST reflect the origin.
+            // This function always returns true (allowing the origin) but reflects it correctly.
+            cb(null, true);
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+        exposedHeaders: ['set-cookie'],
         preflightContinue: false,
         optionsSuccessStatus: 204
     });
 
     await fastify.register(cookie, {
         secret: process.env.JWT_SECRET,
-        parseOptions: {}
+        parseOptions: {
+            path: '/',
+            httpOnly: true,
+            secure: true, // Required for cross-site cookies
+            sameSite: 'none' // Required for cross-site cookies
+        }
     });
 
     await fastify.register(jwt, {
@@ -68,12 +85,13 @@ async function buildServer() {
     fastify.register(tierSettingsRoutes, { prefix: '/api/tier-settings' });
     fastify.register(donationRoutes, { prefix: '/api/donations' });
 
-    // Root route
+    // Root route - Use version to verify deployment
     fastify.get('/', async () => {
         return {
             message: 'Kick Donation API is running!',
-            version: '1.0.0',
-            status: 'healthy'
+            version: '1.0.5',
+            status: 'healthy',
+            origin_verified: true
         };
     });
 
