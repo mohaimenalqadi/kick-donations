@@ -20,29 +20,14 @@ async function buildServer() {
         logger: true
     });
 
-    // Register Plugins
+    // Register Plugins - Simple CORS allowing all origins
     await fastify.register(cors, {
-        origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps, curl, etc.)
-            if (!origin) return callback(null, true);
-
-            // Allow localhost
-            if (origin.includes('localhost:3000')) return callback(null, true);
-
-            // Allow all Vercel deployments (production and preview)
-            if (origin.endsWith('.vercel.app')) return callback(null, true);
-
-            // Allow custom CORS_ORIGIN from env
-            if (process.env.CORS_ORIGIN && origin === process.env.CORS_ORIGIN) {
-                return callback(null, true);
-            }
-
-            // Reject all other origins
-            callback(new Error('Not allowed by CORS'));
-        },
+        origin: true,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+        preflightContinue: false,
+        optionsSuccessStatus: 204
     });
 
     await fastify.register(cookie, {
