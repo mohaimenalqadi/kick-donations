@@ -90,13 +90,11 @@ async function buildServer() {
     // Settings require admin role
     fastify.register(async (instance) => {
         instance.addHook('preHandler', instance.authenticate);
-        instance.addHook('preHandler', authorize(['admin']));
         instance.register(settingsRoutes);
     }, { prefix: '/api/settings' });
 
     fastify.register(async (instance) => {
         instance.addHook('preHandler', instance.authenticate);
-        instance.addHook('preHandler', authorize(['admin']));
         instance.register(tierSettingsRoutes);
     }, { prefix: '/api/tier-settings' });
 
