@@ -39,6 +39,12 @@ export default function OverlayPage() {
     const [tierSettings, setTierSettings] = useState<any[]>([]);
     const processTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Toggle overlay-mode class for transparency
+    useEffect(() => {
+        document.body.classList.add('overlay-mode');
+        return () => document.body.classList.remove('overlay-mode');
+    }, []);
+
     // Initial state fetch
     const fetchInitialState = useCallback(async () => {
         try {
@@ -325,7 +331,7 @@ export default function OverlayPage() {
     };
 
     return (
-        <main className="relative w-full h-screen overflow-hidden bg-transparent font-black rtl">
+        <main className="relative w-full h-screen overflow-hidden bg-[#0a0a0a] font-black rtl">
             {/* Top HUD Header (Symmetric Layout) */}
             <div className="fixed top-10 left-10 right-10 flex justify-between items-start pointer-events-none z-[60]">
                 {/* Left Side: Leaderboard (Only show during active support alerts) */}
@@ -391,12 +397,10 @@ export default function OverlayPage() {
                 )}
             </AnimatePresence>
 
-            {/* Standby Layer (Kick Green) */}
-            <AnimatePresence>
-                {isUnlocked && !isProcessing && queue.length === 0 && (
-                    <StandbyScreen />
-                )}
-            </AnimatePresence>
+            {/* Standby Layer (Kick Green) - Base layer to prevent white flash */}
+            {isUnlocked && (
+                <div className="fixed inset-0 z-0 bg-[#03e115]" />
+            )}
 
             {/* Status indicators (Relocated to bottom-right for clean HUD) */}
             <div className={`fixed bottom-6 right-6 z-50 pointer-events-none transition-opacity duration-1000 ${isUnlocked ? 'opacity-20' : 'opacity-0'}`}>

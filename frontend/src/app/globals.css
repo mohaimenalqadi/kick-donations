@@ -24,8 +24,13 @@ body {
 }
 
 body {
-  background: transparent;
+  background: #000;
   color: #03e115;
+}
+
+/* Ensure overlay specifically is handled correctly */
+body.overlay-mode {
+  background: transparent !important;
 }
 
 .bg-app-dark {
