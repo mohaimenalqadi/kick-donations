@@ -68,17 +68,11 @@ export default function CinematicTier({ donorName, amount, message, duration, on
             <TierBackground
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.CINEMATIC}
-                opacity={0.6}
+                opacity={0.8}
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80" />
-            <div className="grain-overlay" />
-
-            {/* --- 🪐 CINEMATIC ENTRY (TRANSFERRED FROM PROFESSIONAL) --- */}
-            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                <div className="mystery-fusion-effect scale-125" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[4vh] w-full text-center px-4">
@@ -91,7 +85,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                     transition={{ duration: 1 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none text-sovereign-shadow uppercase">
+                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.9)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -106,9 +100,9 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(6rem,16vw,16rem)] font-black text-white leading-none text-sovereign-shadow flex items-center gap-8">
+                                    <motion.span className="text-[clamp(6rem,16vw,16rem)] font-black text-[#00FF00] drop-shadow-[0_0_50px_rgba(0,255,0,0.7)] leading-none flex items-center gap-8">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-red-500 font-black italic drop-shadow-[0_0_25px_rgba(239,68,68,0.7)] uppercase">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#00FF00]/80 font-black italic drop-shadow-[0_0_25px_rgba(0,255,0,0.5)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}
@@ -116,12 +110,12 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {showAmount && message && (
+                        {showAmount && message && message.trim() && (
                             <motion.p
                                 initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                 transition={{ delay: 0.6 }}
-                                className="text-[clamp(1.2rem,2.5vw,3rem)] text-slate-200 font-bold italic max-w-[65vw] mt-8 bg-black/30 backdrop-blur-sm p-6 rounded-2xl border border-white/5 text-sovereign-shadow"
+                                className="text-[clamp(1.2rem,2.5vw,3rem)] text-white font-bold italic max-w-[65vw] mt-8 bg-black/50 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)]"
                             >
                                 "{message}"
                             </motion.p>
@@ -129,9 +123,6 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                     </AnimatePresence>
                 </div>
             </div>
-
-            {/* Bottom Accent Bar */}
-            <div className="fixed bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-red-600 via-white to-red-600 shadow-[0_0_30px_rgba(239,68,68,0.8)] z-50" />
         </motion.div>
     );
 }

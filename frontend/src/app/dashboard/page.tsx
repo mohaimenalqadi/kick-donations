@@ -232,7 +232,7 @@ export default function DashboardPage() {
                                 <div className="p-3 bg-[#03e115]/10 rounded-2xl">
                                     <DollarSign className="w-6 h-6 text-[#03e115]" />
                                 </div>
-                                <span className="text-white/50 font-bold">إجمالي التبرعات</span>
+                                <span className="text-white/50 font-bold">إجمالي الدعم</span>
                             </div>
                             <div className="text-3xl font-black text-white">{stats.total} د.ل</div>
                         </motion.div>
@@ -277,7 +277,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-4 space-y-6">
                     <div className="bg-[#0f0f12] border border-white/5 rounded-[40px] p-8 lg:p-10 sticky top-8">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-black text-white">تبرع جديد</h2>
+                            <h2 className="text-2xl font-black text-white">دعم جديد</h2>
                             <div className="w-10 h-10 bg-[#03e115]/10 rounded-full flex items-center justify-center text-[#03e115]">
                                 <Plus size={20} />
                             </div>
@@ -285,13 +285,13 @@ export default function DashboardPage() {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-2">اسم المتبرع</label>
+                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-2">اسم الداعم</label>
                                 <input
                                     type="text"
                                     value={donorName}
                                     onChange={(e) => setDonorName(e.target.value)}
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:outline-none focus:border-[#03e115]/30 transition-all"
-                                    placeholder="مثال: عبدالرزاق البكوش"
+                                    placeholder="أدخل اسم الداعم هنا..."
                                     required
                                 />
                             </div>
@@ -324,7 +324,7 @@ export default function DashboardPage() {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:outline-none focus:border-[#03e115]/30 transition-all min-h-[120px] resize-none"
-                                    placeholder="اكتب رسالة المتبرع..."
+                                    placeholder="اكتب رسالة الداعم هنا..."
                                 />
                             </div>
 
@@ -338,7 +338,7 @@ export default function DashboardPage() {
                                 ) : (
                                     <>
                                         <Send size={20} />
-                                        <span>إرسال التبرع</span>
+                                        <span>إرسال الدعم</span>
                                     </>
                                 )}
                             </button>
@@ -367,7 +367,7 @@ export default function DashboardPage() {
                                 </button>
                             </div>
                             <span className="bg-white/5 px-4 py-1.5 rounded-full text-xs font-black text-gray-500 border border-white/5">
-                                {donations.length} عملية
+                                {donations.length} دعم
                             </span>
                         </div>
                         <div className="flex items-center gap-2">

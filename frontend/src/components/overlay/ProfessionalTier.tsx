@@ -69,46 +69,15 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
             exit={{ opacity: 0 }}
             className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden"
         >
-            {/* --- 🖼️ TIER BORDER --- */}
-            <AnimatePresence>
-                {showBorder && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="tier-border border-prof"
-                    />
-                )}
-            </AnimatePresence>
-
             {/* --- 🌌 HYBRID BACKGROUND (VIDEO/IMAGE) --- */}
             <TierBackground
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.PROFESSIONAL}
-                opacity={0.6}
+                opacity={0.8}
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-70" />
-
-            {/* --- ✨ SUBTLE AMBIENT LOOP --- */}
-            <AnimatePresence>
-                {showBorder && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 2 }}
-                        className="prism-drift-loop opacity-30"
-                    />
-                )}
-            </AnimatePresence>
-
-            <div className="grain-overlay" />
-
-            {/* --- ⚛️ QUANTUM SINGULARITY ENTRY (7s - PROFESSIONAL EXCLUSIVE) --- */}
-            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                <div className="quantum-singularity-effect" />
-                <div className="crystal-geometry" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[4vh] w-full text-center px-4">
@@ -120,7 +89,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                     animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none text-sovereign-shadow uppercase text-shimmer">
+                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -135,12 +104,9 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                                     className="flex flex-col items-center relative"
                                 >
-                                    {/* --- ✨ VIBRANT BACKLIGHT --- */}
-                                    <div className="absolute inset-[-100px] professional-backlight opacity-60 z-0 animate-pulse" />
-
-                                    <motion.span className="text-[clamp(4.5rem,12vw,12rem)] font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white via-purple-100 to-indigo-200 text-professional-glow text-sovereign-shadow leading-none relative z-10">
+                                    <motion.span className="text-[clamp(4.5rem,12vw,12rem)] font-extrabold text-[#00FF00] drop-shadow-[0_0_40px_rgba(0,255,0,0.6)] leading-none relative z-10">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-purple-200 font-black ml-4 drop-shadow-[0_0_30px_rgba(168,85,247,0.8)] text-shimmer">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#00FF00]/80 font-black ml-4 drop-shadow-[0_0_20px_rgba(0,255,0,0.5)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}
@@ -148,14 +114,14 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {showAmount && message && (
+                        {showAmount && message && message.trim() && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                 transition={{ delay: 0.5 }}
-                                className="unified-message-card card-accent-prof"
+                                className="max-w-4xl px-12 py-6 bg-black/60 backdrop-blur-2xl rounded-[32px] border border-white/10"
                             >
-                                <p className="text-[clamp(1.2rem,2.5vw,3rem)] text-slate-200 font-semibold italic text-sovereign-shadow">
+                                <p className="text-[clamp(1.2rem,2.5vw,3rem)] text-white font-semibold italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
                                     "{message}"
                                 </p>
                             </motion.div>
@@ -163,9 +129,6 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                     </AnimatePresence>
                 </div>
             </div>
-
-            {/* Prismatic Top Bar */}
-            <div className="fixed top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-white to-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.6)] z-[60]" />
         </motion.div>
     );
 }

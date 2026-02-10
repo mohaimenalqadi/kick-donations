@@ -68,54 +68,19 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
             exit={{ opacity: 0 }}
             className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden"
         >
-            {/* --- 🖼️ TIER BORDER --- */}
-            <AnimatePresence>
-                {showOverlay && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="tier-border border-gold"
-                    />
-                )}
-            </AnimatePresence>
-
             {/* --- 🌌 HYBRID BACKGROUND (VIDEO/IMAGE) --- */}
             <TierBackground
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.LEGENDARY}
-                opacity={0.8}
+                opacity={0.9}
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-90" />
-            <div className="grain-overlay" />
-
-            {/* --- 🪐 AMBIENT GLOW --- */}
-            <AnimatePresence>
-                {showOverlay && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.4 }}
-                        transition={{ duration: 4 }}
-                        className="gold-ambient-glow"
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* --- 💥 HYPER-SOVEREIGN IGNITION (10s ENTRY) --- */}
-            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                <div className="nebula-effect scale-150 opacity-40" />
-                <div className="sovereign-ignition-effect" />
-                {/* Custom Gold Shockwave */}
-                <div className="shockwave border-amber-500/50" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/80" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center px-8">
                     <div className="flex flex-col items-center gap-[2vh] relative">
-                        {/* Sovereign Aura Glow */}
-                        <div className="absolute inset-0 z-0 sovereign-aura blur-[100px]" />
-
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
@@ -124,7 +89,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                     transition={{ duration: 1.2, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-4 relative z-10"
                                 >
-                                    <h1 className="text-[clamp(4.5rem,11vw,12rem)] font-black text-white tracking-tighter uppercase leading-none text-sovereign-shadow text-shimmer">
+                                    <h1 className="text-[clamp(4.5rem,11vw,12rem)] font-black text-white tracking-tighter uppercase leading-none drop-shadow-[0_2px_30px_rgba(0,0,0,1)]">
                                         {donorName}
                                     </h1>
                                 </motion.div>
@@ -139,12 +104,9 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                                     className="flex flex-col items-center relative z-10"
                                 >
-                                    <h2 className="text-[clamp(2.5rem,5vw,5rem)] font-black text-amber-400 tracking-[0.2em] uppercase mb-4 text-glow-subtle opacity-80">
-                                        Grand Sovereign Gift
-                                    </h2>
-                                    <motion.span className="text-[clamp(7rem,20vw,22rem)] font-black text-white leading-none text-sovereign-shadow text-shimmer">
+                                    <motion.span className="text-[clamp(7rem,20vw,22rem)] font-black text-[#00FF00] leading-none drop-shadow-[0_0_60px_rgba(0,255,0,0.8)]">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2rem,5vw,5rem)] text-amber-500 font-black ml-8 drop-shadow-[0_0_50px_rgba(245,158,11,0.8)]">د.ل</span>
+                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#00FF00]/90 font-black ml-8 drop-shadow-[0_0_50px_rgba(0,255,0,0.6)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}
@@ -152,14 +114,14 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {showAmount && message && (
+                        {showAmount && message && message.trim() && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9, y: 40, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
                                 transition={{ delay: 0.8, duration: 1 }}
-                                className="unified-message-card card-accent-gold"
+                                className="max-w-6xl px-16 py-8 bg-black/60 backdrop-blur-3xl rounded-[48px] border border-white/20 shadow-2xl"
                             >
-                                <p className="text-[clamp(1.5rem,3vw,4rem)] text-slate-200 font-bold italic text-sovereign-shadow leading-relaxed">
+                                <p className="text-[clamp(1.5rem,3vw,4rem)] text-white font-bold italic drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)] leading-relaxed">
                                     "{message}"
                                 </p>
                             </motion.div>
@@ -167,10 +129,6 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                     </AnimatePresence>
                 </div>
             </div>
-
-            {/* Sovereign Light Pillar */}
-            <div className="fixed left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_60px_rgba(245,158,11,0.8)] top-0 z-[60]" />
-            <div className="fixed left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_60px_rgba(245,158,11,0.8)] bottom-0 z-[60]" />
         </motion.div>
     );
 }

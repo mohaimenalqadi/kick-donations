@@ -69,36 +69,15 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
             exit={{ opacity: 0 }}
             className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden"
         >
-            {/* --- 🖼️ TIER BORDER --- */}
-            <AnimatePresence>
-                {showBorder && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="tier-border border-basic"
-                    />
-                )}
-            </AnimatePresence>
-
             {/* --- 🌌 HYBRID BACKGROUND (VIDEO/IMAGE) --- */}
             <TierBackground
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.BASIC}
-                opacity={0.6}
+                opacity={0.8}
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-60" />
-            <div className="grain-overlay" />
-
-            {/* --- 💥 BASIC ENTRY (3s) --- */}
-            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                <div className="nebula-effect scale-75 opacity-30" />
-                <div
-                    className="ignition-effect scale-50"
-                    style={{ animationDuration: '3s' }}
-                />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[3vh] w-full text-center px-4">
@@ -111,7 +90,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                     transition={{ duration: 0.6 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(2rem,5vw,5rem)] font-black text-white tracking-tight leading-none text-sovereign-shadow uppercase">
+                                    <h2 className="text-[clamp(2rem,5vw,5rem)] font-black text-white tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -126,9 +105,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                     transition={{ type: "spring", stiffness: 150, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(3.5rem,8vw,8rem)] font-black text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.5)] text-sovereign-shadow leading-none">
+                                    <span className="text-[clamp(3.5rem,8vw,8rem)] font-black text-[#00FF00] drop-shadow-[0_0_20px_rgba(0,255,0,0.4)] leading-none">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1rem,2.5vw,2.5rem)] text-emerald-300/80 font-black ml-4">د.ل</span>
+                                        <span className="text-[clamp(1rem,2.5vw,2.5rem)] text-[#00FF00]/80 font-black ml-4">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -136,14 +115,14 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {showAmount && message && (
+                        {showAmount && message && message.trim() && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.3 }}
-                                className="unified-message-card card-accent-basic"
+                                className="max-w-2xl px-8 py-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/5"
                             >
-                                <p className="text-[clamp(1rem,2vw,2rem)] text-slate-200 font-medium italic text-sovereign-shadow">
+                                <p className="text-[clamp(1rem,2vw,2rem)] text-white font-medium italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)]">
                                     "{message}"
                                 </p>
                             </motion.div>
@@ -151,9 +130,6 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                     </AnimatePresence>
                 </div>
             </div>
-
-            {/* Emerald Accent Top Bar */}
-            <div className="fixed top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-white to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.6)] z-[60]" />
         </motion.div>
     );
 }

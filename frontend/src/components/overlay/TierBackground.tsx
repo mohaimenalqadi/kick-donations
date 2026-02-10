@@ -72,11 +72,16 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
                     src={finalUrl}
                     autoPlay
                     loop
-                    muted={!(volume && volume > 0)}
+                    muted={false}
                     playsInline
                     className="w-full h-full object-cover"
                     style={{ opacity }}
-                    onLoadedData={() => console.log('[TierBackground] ✅ Video loaded:', finalUrl)}
+                    onLoadedData={() => {
+                        console.log('[TierBackground] ✅ Video loaded:', finalUrl);
+                        if (videoRef.current) {
+                            videoRef.current.play().catch(err => console.error('AutoPlay failed:', err));
+                        }
+                    }}
                     onError={() => console.error('[TierBackground] ❌ Video failed:', finalUrl)}
                 />
             </div>

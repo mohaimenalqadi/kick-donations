@@ -30,15 +30,13 @@ export default function SettingsPage() {
 
     const [settings, setSettings] = useState({
         site_title: 'KickPay',
-        currency: 'LYD',
-        mute_overlay: false
+        currency: 'LYD'
     });
 
     // Platform Settings Local State
     const [localSettings, setLocalSettings] = useState({
         site_title: 'KickPay',
-        currency: 'LYD',
-        mute_overlay: false
+        currency: 'LYD'
     });
 
     const [tiers, setTiers] = useState<any[]>([]);
@@ -122,7 +120,6 @@ export default function SettingsPage() {
         { id: 'general', label: 'عام', icon: Globe },
         { id: 'overlay', label: 'صفحة العرض', icon: Monitor },
         { id: 'tiers', label: 'تخصيص الفئات', icon: CreditCard },
-        { id: 'audio', label: 'الصوتيات', icon: Volume2 },
         { id: 'security', label: 'الأمان', icon: Shield },
     ];
 
@@ -360,7 +357,7 @@ export default function SettingsPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-1 gap-6">
                                                 <div className="space-y-4">
                                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">رابط الوسائط (Video/GIF)</label>
                                                     <input
@@ -370,20 +367,6 @@ export default function SettingsPage() {
                                                         onChange={(e) => {
                                                             const newTiers = [...localTiers];
                                                             newTiers[idx].background_url = e.target.value;
-                                                            setLocalTiers(newTiers);
-                                                        }}
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white font-mono text-xs focus:outline-none focus:border-[#03e115]/30 transition-all"
-                                                    />
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">رابط صوت التنبيه (MP3/WAV)</label>
-                                                    <input
-                                                        type="text"
-                                                        value={tier.sound_url || ''}
-                                                        placeholder="https://example.com/sound.mp3"
-                                                        onChange={(e) => {
-                                                            const newTiers = [...localTiers];
-                                                            newTiers[idx].sound_url = e.target.value;
                                                             setLocalTiers(newTiers);
                                                         }}
                                                         className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white font-mono text-xs focus:outline-none focus:border-[#03e115]/30 transition-all"
@@ -418,81 +401,7 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {/* Audio Settings */}
-                    {activeTab === 'audio' && (
-                        <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 text-right">
-                            <div className="bg-[#0f0f12] border border-white/5 rounded-[40px] p-10 space-y-8">
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-2">
-                                        <h3 className="text-xl font-black text-white">إعدادات الصوت</h3>
-                                        <p className="text-gray-500 font-bold text-sm">تحكم في مستوى صوت التنبيهات لكل فئة تبرع.</p>
-                                    </div>
-                                    <Volume2 className="text-[#03e115]" size={32} />
-                                </div>
 
-                                {/* Global Mute Toggle */}
-                                <div className="flex items-center justify-between p-6 bg-black/30 rounded-3xl border border-white/5">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-red-400/10 rounded-2xl flex items-center justify-center text-red-400">
-                                            <Volume2 size={24} />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-lg font-black text-white">كتم جميع الأصوات</h4>
-                                            <p className="text-gray-500 font-bold text-xs">إيقاف كافة أصوات التنبيهات في صفحة العرض.</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            const newMuteState = !localSettings.mute_overlay;
-                                            setLocalSettings(prev => ({ ...prev, mute_overlay: newMuteState }));
-                                            handleUpdate();
-                                        }}
-                                        className={`w-16 h-8 rounded-full transition-all relative ${localSettings.mute_overlay ? 'bg-red-500' : 'bg-white/10'}`}
-                                    >
-                                        <div className={`w-6 h-6 bg-white rounded-full absolute top-1 transition-all ${localSettings.mute_overlay ? 'right-1' : 'left-1'}`} />
-                                    </button>
-                                </div>
-
-                                {/* Per-Tier Volume Sliders */}
-                                <div className="space-y-4">
-                                    <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest pr-2">مستوى الصوت لكل فئة</h4>
-                                    {localTiers.map((tier, idx) => (
-                                        <div key={tier.id} className="p-4 bg-black/20 rounded-2xl border border-white/5 space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-3 h-8 rounded-full" style={{ backgroundColor: tier.color }} />
-                                                <span className="font-bold text-white">{tier.label}</span>
-                                                <span className="text-xs font-black text-gray-500 uppercase">{tier.tier_key}</span>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <Volume2 className="text-gray-500" size={16} />
-                                                <input
-                                                    type="range"
-                                                    min="0"
-                                                    max="100"
-                                                    value={(tier.volume || 80)}
-                                                    onChange={(e) => {
-                                                        const newTiers = [...localTiers];
-                                                        newTiers[idx].volume = Number(e.target.value);
-                                                        setLocalTiers(newTiers);
-                                                    }}
-                                                    className="flex-1 accent-[#03e115] cursor-pointer"
-                                                />
-                                                <span className="w-12 text-center font-black text-[#03e115]">{tier.volume || 80}%</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={handleUpdate}
-                                    disabled={saving}
-                                    className="w-full px-6 py-4 bg-[#03e115] text-[#0a0a0a] rounded-2xl font-black hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:scale-100"
-                                >
-                                    {saving ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'حفظ إعدادات الصوت'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Security Settings */}
                     {activeTab === 'security' && (

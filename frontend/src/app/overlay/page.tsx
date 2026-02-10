@@ -328,36 +328,13 @@ export default function OverlayPage() {
         <main className="relative w-full h-screen overflow-hidden bg-transparent font-black rtl">
             {/* Top HUD Header (Symmetric Layout) */}
             <div className="fixed top-10 left-10 right-10 flex justify-between items-start pointer-events-none z-[60]">
-                {/* Left Side: Leaderboard */}
+                {/* Left Side: Leaderboard (Only show during active support alerts) */}
                 <div className="flex flex-col items-start gap-4">
-                    <Leaderboard topDonor={topDonor} />
+                    {isProcessing && <Leaderboard topDonor={topDonor} />}
                 </div>
 
-                {/* Right Side: Queue Counter */}
+                {/* Right Side: Reserved for future elements */}
                 <div className="flex flex-col items-end gap-4 pointer-events-none">
-                    <AnimatePresence>
-                        {isUnlocked && queue.length > 0 && (
-                            <motion.div
-                                initial={{ opacity: 0, x: 50, scale: 0.8 }}
-                                animate={{ opacity: 1, x: 0, scale: 1 }}
-                                exit={{ opacity: 0, x: 50, scale: 0.8 }}
-                                className="pointer-events-none"
-                            >
-                                <div className="bg-[#0f0f12]/60 backdrop-blur-xl border border-white/10 rounded-[24px] p-2 px-6 flex items-center gap-4 shadow-2xl shadow-black/50 overflow-hidden group">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#03e115]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
-                                    <div className="flex flex-col items-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xl font-black text-[#03e115]">
-                                                {queue.length - 1}
-                                            </span>
-                                            <span className="text-sm font-bold text-white/50">متبقي</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
             </div>
 

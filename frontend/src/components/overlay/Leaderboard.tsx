@@ -40,7 +40,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ topDonor }) => {
                         {/* Text Content */}
                         <div className="flex flex-col min-w-0">
                             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] leading-none mb-1">
-                                أفضل الداعمين
+                                أفضل دعم
                             </span>
                             <div className="flex items-center gap-3">
                                 <span className="text-lg font-black text-white whitespace-nowrap">
