@@ -116,13 +116,20 @@ export default function DashboardPage() {
         const init = async () => {
             setLoading(true);
             try {
-                const [userRes] = await Promise.all([
-                    api.getCurrentUser(),
-                    fetchDonations(),
-                    fetchStats(),
-                    fetchAnalytics()
-                ]);
-                setUserRole(userRes.user.role);
+                // 1. Fetch user first to know the role
+                const userRes = await api.getCurrentUser();
+                const role = userRes.user.role;
+                setUserRole(role);
+
+                // 2. Fetch data based on role
+                const promises: Promise<any>[] = [fetchDonations()];
+
+                if (role === 'admin') {
+                    promises.push(fetchStats());
+                    promises.push(fetchAnalytics());
+                }
+
+                await Promise.all(promises);
             } catch (err) {
                 console.error('Init Error:', err);
             } finally {
