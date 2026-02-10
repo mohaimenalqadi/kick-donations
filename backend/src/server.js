@@ -8,9 +8,13 @@ const { Server } = require('socket.io');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
 const donationRoutes = require('./routes/donations');
 const settingsRoutes = require('./routes/settings');
 const tierSettingsRoutes = require('./routes/tier-settings');
+
+// Import middleware
+const authorize = require('./middleware/authorize');
 
 // Import services
 const { initializeSocket } = require('./services/websocket');
@@ -81,8 +85,21 @@ async function buildServer() {
 
     // Register Routes
     fastify.register(authRoutes, { prefix: '/api/auth' });
-    fastify.register(settingsRoutes, { prefix: '/api/settings' });
-    fastify.register(tierSettingsRoutes, { prefix: '/api/tier-settings' });
+    fastify.register(userRoutes, { prefix: '/api/users' });
+
+    // Settings require admin role
+    fastify.register(async (instance) => {
+        instance.addHook('preHandler', instance.authenticate);
+        instance.addHook('preHandler', authorize(['admin']));
+        instance.register(settingsRoutes);
+    }, { prefix: '/api/settings' });
+
+    fastify.register(async (instance) => {
+        instance.addHook('preHandler', instance.authenticate);
+        instance.addHook('preHandler', authorize(['admin']));
+        instance.register(tierSettingsRoutes);
+    }, { prefix: '/api/tier-settings' });
+
     fastify.register(donationRoutes, { prefix: '/api/donations' });
 
     // Root route - Use version to verify deployment

@@ -54,6 +54,7 @@ export default function DashboardPage() {
     const [stats, setStats] = useState({ total: 0, count: 0, average: 0 });
     const [connections, setConnections] = useState({ adminCount: 0, overlayCount: 0 });
     const [sendingIds, setSendingIds] = useState<Set<string>>(new Set());
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     // Form state
     const [donorName, setDonorName] = useState('');
@@ -114,8 +115,19 @@ export default function DashboardPage() {
     useEffect(() => {
         const init = async () => {
             setLoading(true);
-            await Promise.all([fetchDonations(), fetchStats(), fetchAnalytics()]);
-            setLoading(false);
+            try {
+                const [userRes] = await Promise.all([
+                    api.getCurrentUser(),
+                    fetchDonations(),
+                    fetchStats(),
+                    fetchAnalytics()
+                ]);
+                setUserRole(userRes.user.role);
+            } catch (err) {
+                console.error('Init Error:', err);
+            } finally {
+                setLoading(false);
+            }
         };
         init();
 
@@ -217,60 +229,62 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Stats Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {/* Stats Summary */}
-                {stats && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
-                        >
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-[#03e115]/5 blur-3xl rounded-full -mr-12 -mt-12" />
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-[#03e115]/10 rounded-2xl">
-                                    <DollarSign className="w-6 h-6 text-[#03e115]" />
+            {/* Stats Section - Admin Only */}
+            {userRole === 'admin' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    {/* Stats Summary */}
+                    {stats && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
+                            >
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-[#03e115]/5 blur-3xl rounded-full -mr-12 -mt-12" />
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="p-3 bg-[#03e115]/10 rounded-2xl">
+                                        <DollarSign className="w-6 h-6 text-[#03e115]" />
+                                    </div>
+                                    <span className="text-white/50 font-bold">إجمالي الدعم</span>
                                 </div>
-                                <span className="text-white/50 font-bold">إجمالي الدعم</span>
-                            </div>
-                            <div className="text-3xl font-black text-white">{stats.total} د.ل</div>
-                        </motion.div>
+                                <div className="text-3xl font-black text-white">{stats.total} د.ل</div>
+                            </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
-                        >
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full -mr-12 -mt-12" />
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-blue-500/10 rounded-2xl">
-                                    <TrendingUp className="w-6 h-6 text-blue-500" />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
+                            >
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full -mr-12 -mt-12" />
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="p-3 bg-blue-500/10 rounded-2xl">
+                                        <TrendingUp className="w-6 h-6 text-blue-500" />
+                                    </div>
+                                    <span className="text-white/50 font-bold">عمليات اليوم</span>
                                 </div>
-                                <span className="text-white/50 font-bold">عمليات اليوم</span>
-                            </div>
-                            <div className="text-3xl font-black text-white">{stats.count}</div>
-                        </motion.div>
+                                <div className="text-3xl font-black text-white">{stats.count}</div>
+                            </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
-                        >
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-3xl rounded-full -mr-12 -mt-12" />
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-purple-500/10 rounded-2xl">
-                                    <Zap className="w-6 h-6 text-purple-500" />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 relative overflow-hidden group"
+                            >
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-3xl rounded-full -mr-12 -mt-12" />
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="p-3 bg-purple-500/10 rounded-2xl">
+                                        <Zap className="w-6 h-6 text-purple-500" />
+                                    </div>
+                                    <span className="text-white/50 font-bold">المتوسط اليومي</span>
                                 </div>
-                                <span className="text-white/50 font-bold">المتوسط اليومي</span>
-                            </div>
-                            <div className="text-3xl font-black text-white">{stats.average} د.ل</div>
-                        </motion.div>
-                    </>
-                )}
-            </div>
+                                <div className="text-3xl font-black text-white">{stats.average} د.ل</div>
+                            </motion.div>
+                        </>
+                    )}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Form Section */}
@@ -358,34 +372,40 @@ export default function DashboardPage() {
                                 >
                                     آخر العمليات
                                 </button>
-                                <button
-                                    onClick={() => setView('analytics')}
-                                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${view === 'analytics' ? 'bg-[#03e115] text-[#0a0a0a]' : 'text-gray-500 hover:text-white'
-                                        }`}
-                                >
-                                    التحليلات
-                                </button>
+                                {userRole === 'admin' && (
+                                    <button
+                                        onClick={() => setView('analytics')}
+                                        className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${view === 'analytics' ? 'bg-[#03e115] text-[#0a0a0a]' : 'text-gray-500 hover:text-white'
+                                            }`}
+                                    >
+                                        التحليلات
+                                    </button>
+                                )}
                             </div>
                             <span className="bg-white/5 px-4 py-1.5 rounded-full text-xs font-black text-gray-500 border border-white/5">
                                 {donations.length} دعم
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => handleBulkDelete('today')}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                            >
-                                <Trash2 size={14} />
-                                <span>حذف اليوم</span>
-                            </button>
-                            <button
-                                onClick={() => handleBulkDelete('all')}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                            >
-                                <AlertCircle size={14} />
-                                <span>حذف الكل</span>
-                            </button>
-                            <div className="w-px h-8 bg-white/5 mx-2" />
+                            {userRole === 'admin' && (
+                                <>
+                                    <button
+                                        onClick={() => handleBulkDelete('today')}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        <Trash2 size={14} />
+                                        <span>حذف اليوم</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleBulkDelete('all')}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        <AlertCircle size={14} />
+                                        <span>حذف الكل</span>
+                                    </button>
+                                    <div className="w-px h-8 bg-white/5 mx-2" />
+                                </>
+                            )}
                             <button
                                 onClick={fetchDonations}
                                 className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-gray-400 hover:text-white transition-all underline-none"

@@ -156,6 +156,31 @@ class ApiClient {
         });
     }
 
+    // User management endpoints
+    async getUsers(): Promise<{ users: any[] }> {
+        return this.request('/api/users');
+    }
+
+    async createUser(data: { username: string; password: string; role: string }): Promise<{ success: boolean; user: any }> {
+        return this.request('/api/users', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateUser(id: string, data: { password?: string; role?: string }): Promise<{ success: boolean; user: any }> {
+        return this.request(`/api/users/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteUser(id: string): Promise<{ success: boolean }> {
+        return this.request(`/api/users/${id}`, {
+            method: 'DELETE',
+        });
+    }
+
     // Donation endpoints
     async getDonations(status?: string): Promise<DonationsResponse> {
         const query = status ? `?status=${status}` : '';

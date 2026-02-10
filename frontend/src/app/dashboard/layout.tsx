@@ -12,7 +12,8 @@ import {
     LogOut,
     Menu,
     X,
-    Bell
+    Bell,
+    ShieldCheck
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -51,7 +52,8 @@ export default function DashboardLayout({
     const navItems = [
         { name: 'لوحة التحكم', href: '/dashboard', icon: LayoutDashboard },
         { name: 'الملف الشخصي', href: '/dashboard/profile', icon: User },
-        { name: 'الإعدادات', href: '/dashboard/settings', icon: Settings },
+        { name: 'المسؤوليات', href: '/dashboard/responsibilities', icon: ShieldCheck, adminOnly: true },
+        { name: 'الإعدادات', href: '/dashboard/settings', icon: Settings, adminOnly: true },
         { name: 'مركز المساعدة', href: '/dashboard/help', icon: HelpCircle },
     ];
 
@@ -81,24 +83,26 @@ export default function DashboardLayout({
                     </div>
 
                     <nav className="space-y-1">
-                        {navItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive = pathname === item.href;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                        ? 'bg-[#03e115]/10 text-[#03e115]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                        }`}
-                                >
-                                    <Icon size={20} className={isActive ? 'text-[#03e115]' : 'group-hover:scale-110 transition-transform'} />
-                                    <span className="font-bold">{item.name}</span>
-                                    {isActive && <div className="mr-auto w-1.5 h-1.5 rounded-full bg-[#03e115] shadow-[0_0_10px_#03e115]" />}
-                                </Link>
-                            );
-                        })}
+                        {navItems
+                            .filter(item => !item.adminOnly || user?.role === 'admin')
+                            .map((item) => {
+                                const Icon = item.icon;
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                                            ? 'bg-[#03e115]/10 text-[#03e115]'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        <Icon size={20} className={isActive ? 'text-[#03e115]' : 'group-hover:scale-110 transition-transform'} />
+                                        <span className="font-bold">{item.name}</span>
+                                        {isActive && <div className="mr-auto w-1.5 h-1.5 rounded-full bg-[#03e115] shadow-[0_0_10px_#03e115]" />}
+                                    </Link>
+                                );
+                            })}
                     </nav>
                 </div>
 
@@ -141,24 +145,26 @@ export default function DashboardLayout({
                             </button>
                         </div>
                         <nav className="space-y-1">
-                            {navItems.map((item) => {
-                                const Icon = item.icon;
-                                const isActive = pathname === item.href;
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                            ? 'bg-[#03e115]/10 text-[#03e115]'
-                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                            }`}
-                                    >
-                                        <Icon size={20} />
-                                        <span className="font-bold">{item.name}</span>
-                                    </Link>
-                                );
-                            })}
+                            {navItems
+                                .filter(item => !item.adminOnly || user?.role === 'admin')
+                                .map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setIsSidebarOpen(false)}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                                ? 'bg-[#03e115]/10 text-[#03e115]'
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                }`}
+                                        >
+                                            <Icon size={20} />
+                                            <span className="font-bold">{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
                             <button
                                 onClick={async () => {
                                     await api.logout();
@@ -196,7 +202,7 @@ export default function DashboardLayout({
                             <div className="text-right">
                                 <p className="text-sm font-bold leading-tight">{user.username}</p>
                                 <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">
-                                    {user.role === 'admin' ? 'MEMBER' : 'STAFF'}
+                                    {user.role === 'admin' ? 'ADMIN' : 'MODERATOR'}
                                 </p>
                             </div>
                         </div>

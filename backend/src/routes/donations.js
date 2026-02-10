@@ -1,4 +1,5 @@
 const { supabase } = require('../config/database');
+const authorize = require('../middleware/authorize');
 const { validateDonation } = require('../utils/validation');
 const { calculateTier } = require('../utils/tiers');
 const { emitNewDonation, emitStatusUpdate, getConnectionStats } = require('../services/websocket');
@@ -204,7 +205,8 @@ async function donationRoutes(fastify, options) {
      * Bulk delete donations (today or all)
      */
     fastify.delete('/bulk', {
-        preHandler: [fastify.authenticate]
+        preHandler: [fastify.authenticate, authorize(['admin'])],
+        schema: {}
     }, async (request, reply) => {
         const { period } = request.query; // 'today' or 'all'
 
@@ -268,7 +270,8 @@ async function donationRoutes(fastify, options) {
      * Get donation analytics for charts
      */
     fastify.get('/analytics', {
-        preHandler: [fastify.authenticate]
+        preHandler: [fastify.authenticate, authorize(['admin'])],
+        schema: {}
     }, async (request, reply) => {
         const { start, end } = request.query;
 
