@@ -383,6 +383,59 @@ async function donationRoutes(fastify, options) {
             return reply.code(500).send({ error: 'خطأ في جلب الإحصائيات' });
         }
     });
+    /**
+     * POST /api/donations/sms-auto
+     * Auto-create donation from SMS automation (n8n)
+     * Protected by API Key (no login required)
+     */
+    fastify.post('/sms-auto', async (request, reply) => {
+        // التحقق من مفتاح API
+        const apiKey = request.headers['x-api-key'];
+        const validKey = process.env.SMS_AUTOMATION_KEY;
+
+        if (!apiKey || apiKey !== validKey || !validKey) {
+            return reply.code(401).send({ error: 'مفتاح API غير صالح' });
+        }
+
+        const { donor_name, amount, message, donor_phone } = request.body;
+
+        try {
+            // التحقق من البيانات
+            const validation = validateDonation({ donor_name, amount, message });
+            if (!validation.valid) {
+                return reply.code(400).send({ error: validation.errors.join(', ') });
+            }
+
+            const { donor_name: vName, amount: vAmount, message: vMessage } = validation.data;
+            const tierInfo = calculateTier(vAmount);
+
+            // إنشاء التبرع في قاعدة البيانات
+            const { data: donation, error } = await supabase
+                .from('donations')
+                .insert([{
+                    donor_name: vName,
+                    amount: vAmount,
+                    message: vMessage,
+                    tier: tierInfo.name,
+                    status: 'pending',
+                    // نضع رقم الهاتف في الملاحظات أو حقل إضافي إذا أردت مستقبلاً
+                    metadata: { donor_phone }
+                }])
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // إرسال للبث مباشرة عبر WebSocket
+            emitNewDonation(donation);
+
+            return { success: true, donation };
+
+        } catch (err) {
+            fastify.log.error(err);
+            return reply.code(400).send({ error: err.message });
+        }
+    });
 }
 
 module.exports = donationRoutes;
