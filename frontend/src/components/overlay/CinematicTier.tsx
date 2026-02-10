@@ -100,9 +100,9 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(6rem,16vw,16rem)] font-black text-[#00FF00] drop-shadow-[0_0_50px_rgba(0,255,0,0.7)] leading-none flex items-center gap-8">
+                                    <motion.span className="text-[clamp(6rem,16vw,16rem)] font-black text-[#fbbf24] drop-shadow-[0_0_50px_rgba(251,191,36,0.7)] leading-none flex items-center gap-8">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#00FF00]/80 font-black italic drop-shadow-[0_0_25px_rgba(0,255,0,0.5)]">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#fbbf24]/80 font-black italic drop-shadow-[0_0_25px_rgba(251,191,36,0.5)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}

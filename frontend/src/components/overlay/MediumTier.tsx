@@ -105,9 +105,9 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(4rem,10vw,10rem)] font-black text-[#00FF00] drop-shadow-[0_0_30px_rgba(0,255,0,0.5)] leading-none">
+                                    <span className="text-[clamp(4rem,10vw,10rem)] font-black text-[#fbbf24] drop-shadow-[0_0_30px_rgba(251,191,36,0.5)] leading-none">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.2rem,3vw,3.5rem)] text-[#00FF00]/80 font-black ml-4">د.ل</span>
+                                        <span className="text-[clamp(1.2rem,3vw,3.5rem)] text-[#fbbf24]/80 font-black ml-4">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}

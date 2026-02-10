@@ -104,9 +104,9 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                                     className="flex flex-col items-center relative"
                                 >
-                                    <motion.span className="text-[clamp(4.5rem,12vw,12rem)] font-extrabold text-[#00FF00] drop-shadow-[0_0_40px_rgba(0,255,0,0.6)] leading-none relative z-10">
+                                    <motion.span className="text-[clamp(4.5rem,12vw,12rem)] font-extrabold text-[#fbbf24] drop-shadow-[0_0_40px_rgba(251,191,36,0.6)] leading-none relative z-10">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#00FF00]/80 font-black ml-4 drop-shadow-[0_0_20px_rgba(0,255,0,0.5)]">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#fbbf24]/80 font-black ml-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}

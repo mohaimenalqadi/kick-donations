@@ -104,9 +104,9 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                                     className="flex flex-col items-center relative z-10"
                                 >
-                                    <motion.span className="text-[clamp(7rem,20vw,22rem)] font-black text-[#00FF00] leading-none drop-shadow-[0_0_60px_rgba(0,255,0,0.8)]">
+                                    <motion.span className="text-[clamp(7rem,20vw,22rem)] font-black text-[#fbbf24] leading-none drop-shadow-[0_0_60px_rgba(251,191,36,0.8)]">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#00FF00]/90 font-black ml-8 drop-shadow-[0_0_50px_rgba(0,255,0,0.6)]">د.ل</span>
+                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#fbbf24]/90 font-black ml-8 drop-shadow-[0_0_50px_rgba(251,191,36,0.6)]">د.ل</span>
                                     </motion.span>
                                 </motion.div>
                             )}
