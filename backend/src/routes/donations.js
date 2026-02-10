@@ -417,9 +417,7 @@ async function donationRoutes(fastify, options) {
                     amount: vAmount,
                     message: vMessage,
                     tier: tierInfo.name,
-                    status: 'pending',
-                    // نضع رقم الهاتف في الملاحظات أو حقل إضافي إذا أردت مستقبلاً
-                    metadata: { donor_phone }
+                    status: 'pending'
                 }])
                 .select()
                 .single();
