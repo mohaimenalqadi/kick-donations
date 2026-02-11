@@ -63,7 +63,7 @@ function validateAmount(amount) {
 }
 
 /**
- * Validate donation message
+ * Advanced Profanity Filter with Normalization and Libyan Dialect support
  * @param {string} message - Donation message
  * @returns {object} { valid: boolean, value: string }
  */
@@ -74,31 +74,50 @@ function validateMessage(message) {
 
     const sanitized = sanitizeString(message);
 
-    // قائمة الكلمات النابية (Arabic Profanity List)
+    // 1. القائمة الشاملة للشتائم (العامة، الليبية، وبمختلف الصيغ)
     const profanityList = [
+        // عامة (Common Arabic)
         'كلب', 'حمار', 'تفه', 'شتم', 'لعن', 'وسخ', 'عاهر', 'منيوك', 'قواد', 'عرص',
-        'شرموط', 'لبوة', 'خنيث', 'زبي', 'كس', 'طيز', 'كسمك', 'يا واد', 'يا بنت',
-        'نيك', 'تناك', 'مص', 'لحس', 'خرا', 'زق', 'يا حيوان'
+        'شرموط', 'لبوة', 'خنيث', 'زبي', 'كس', 'طيز', 'كسمك', 'نيك', 'تناك', 'مص', 'لحس',
+        'خرا', 'زق', 'يا حيوان', 'سكس', 'اباحي',
+
+        // ليبية (Libyan Dialect)
+        'فرخ', 'تيس', 'صايع', 'مفرخ', 'فرخة', 'طير', 'شلاكة',
+        'منيك', 'نيكة', 'عطيب', 'حي عليك', 'يا خامر', 'خامر', 'يا فاشل',
+        'تافه', 'مسخ', 'موسخ', 'يا صايع', 'يا بو ', 'يا ام ', 'يا عيل', 'عيل', 'سربوت', 'صرمك', 'زكمك', 'زكمتك', 'قحبة', 'قحبتك', 'زبر', 'زبري', 'ميبون', 'ميبونه', 'زامل', 'ولد قحبة', 'طيز', 'طيزك', 'اكلة', 'عاضة'
     ];
 
-    // Check for spam patterns
+    // 2. فحص الأنماط المتكررة والروابط (Spam Patterns)
     const spamPatterns = [
-        /(.)\1{5,}/,              // Repeated characters
-        /(https?:\/\/)/i,         // URLs
-        /\b(discord|telegram)\b/i // External links
+        /(.)\1{7,}/,              // تكرار حرف أكثر من 7 مرات
+        /(https?:\/\/)/i,         // روابط
+        /\b(discord|telegram|kick|twitch)\b/i // روابط خارجية
     ];
 
-    // 1. Check for spam
     for (const pattern of spamPatterns) {
         if (pattern.test(sanitized)) {
             return { valid: true, value: '[رسالة محظورة]' };
         }
     }
 
-    // 2. Check for profanity
-    const lowerMessage = sanitized.toLowerCase();
+    // 3. خوارزمية كشف الخداع (Text Normalization)
+    // أ) تنظيف النص من (المسافات، النقاط، الزخارف، الحركات) لتوقع الخداع
+    const normalizedText = sanitized
+        .replace(/[\s\.\-\_\,\;\:\!\?\*\/\\\#\$\%\^\&\(\)\[\]\{\}\+\=]/g, '') // إزالة كل الرموز والمسافات
+        .replace(/[ًٌٍَُِّْٰ]/g, '') // إزالة التشكيل
+        .replace(/(.)\1+/g, '$1'); // دمج الحروف المكررة (ككككلب -> كلب)
+
+    const lowerOriginal = sanitized.toLowerCase();
+    const lowerNormalized = normalizedText.toLowerCase();
+
+    // 4. الفحص المزدوج (Original & Normalized)
     for (const word of profanityList) {
-        if (lowerMessage.includes(word)) {
+        // فحص في النص الأصلي
+        if (lowerOriginal.includes(word)) {
+            return { valid: true, value: '[رسالة محظورة]' };
+        }
+        // فحص في النص "المطهر" (لكشف الخداع بالمسافات والتكرار)
+        if (lowerNormalized.includes(word)) {
             return { valid: true, value: '[رسالة محظورة]' };
         }
     }
