@@ -74,6 +74,13 @@ function validateMessage(message) {
 
     const sanitized = sanitizeString(message);
 
+    // قائمة الكلمات النابية (Arabic Profanity List)
+    const profanityList = [
+        'كلب', 'حمار', 'تفه', 'شتم', 'لعن', 'وسخ', 'عاهر', 'منيوك', 'قواد', 'عرص',
+        'شرموط', 'لبوة', 'خنيث', 'زبي', 'كس', 'طيز', 'كسمك', 'يا واد', 'يا بنت',
+        'نيك', 'تناك', 'مص', 'لحس', 'خرا', 'زق', 'يا حيوان'
+    ];
+
     // Check for spam patterns
     const spamPatterns = [
         /(.)\1{5,}/,              // Repeated characters
@@ -81,8 +88,17 @@ function validateMessage(message) {
         /\b(discord|telegram)\b/i // External links
     ];
 
+    // 1. Check for spam
     for (const pattern of spamPatterns) {
         if (pattern.test(sanitized)) {
+            return { valid: true, value: '[رسالة محظورة]' };
+        }
+    }
+
+    // 2. Check for profanity
+    const lowerMessage = sanitized.toLowerCase();
+    for (const word of profanityList) {
+        if (lowerMessage.includes(word)) {
             return { valid: true, value: '[رسالة محظورة]' };
         }
     }

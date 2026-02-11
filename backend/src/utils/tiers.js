@@ -1,43 +1,51 @@
 /**
  * Tier calculation utility
  * Determines donation tier based on amount (Libyan Dinar)
+ * 6 Tiers: tier1 (1-4), tier2 (5-9), tier3 (10-19), tier4 (20-29), tier5 (30-39), tier6 (40-49)
  */
 
 const TIERS = {
-    basic: {
+    tier1: {
         min: 1,
-        max: 9,
+        max: 4,
         duration: 10000,      // 10 seconds
         label: 'بسيط',
         color: '#10b981'
     },
-    medium: {
-        min: 10,
-        max: 49,
-        duration: 30000,      // 30 seconds
-        label: 'متوسط',
+    tier2: {
+        min: 5,
+        max: 9,
+        duration: 15000,      // 15 seconds
+        label: 'فضي',
         color: '#3b82f6'
     },
-    professional: {
-        min: 50,
-        max: 99,
-        duration: 60000,      // 1 minute
-        label: 'احترافي',
-        color: '#8b5cf6'
-    },
-    cinematic: {
-        min: 100,
-        max: 499,
-        duration: 180000,     // 3 minutes
-        label: 'سينمائي',
+    tier3: {
+        min: 10,
+        max: 19,
+        duration: 30000,      // 30 seconds
+        label: 'ذهبي',
         color: '#f59e0b'
     },
-    legendary: {
-        min: 500,
-        max: Infinity,
-        duration: 300000,     // 5 minutes
-        label: 'خارق',
+    tier4: {
+        min: 20,
+        max: 29,
+        duration: 45000,      // 45 seconds
+        label: 'بلاتيني',
+        color: '#8b5cf6'
+    },
+    tier5: {
+        min: 30,
+        max: 39,
+        duration: 60000,      // 60 seconds
+        label: 'ملكي',
         color: '#ef4444'
+    },
+    tier6: {
+        min: 40,
+        max: 49,
+        duration: 90000,      // 90 seconds
+        label: 'أسطوري',
+        color: '#e879f9'
     }
 };
 
@@ -49,19 +57,22 @@ const TIERS = {
 function calculateTier(amount) {
     const numAmount = parseFloat(amount);
 
-    if (numAmount >= TIERS.legendary.min) {
-        return { name: 'legendary', ...TIERS.legendary };
+    if (numAmount >= TIERS.tier6.min) {
+        return { name: 'tier6', ...TIERS.tier6 };
     }
-    if (numAmount >= TIERS.cinematic.min) {
-        return { name: 'cinematic', ...TIERS.cinematic };
+    if (numAmount >= TIERS.tier5.min) {
+        return { name: 'tier5', ...TIERS.tier5 };
     }
-    if (numAmount >= TIERS.professional.min) {
-        return { name: 'professional', ...TIERS.professional };
+    if (numAmount >= TIERS.tier4.min) {
+        return { name: 'tier4', ...TIERS.tier4 };
     }
-    if (numAmount >= TIERS.medium.min) {
-        return { name: 'medium', ...TIERS.medium };
+    if (numAmount >= TIERS.tier3.min) {
+        return { name: 'tier3', ...TIERS.tier3 };
     }
-    return { name: 'basic', ...TIERS.basic };
+    if (numAmount >= TIERS.tier2.min) {
+        return { name: 'tier2', ...TIERS.tier2 };
+    }
+    return { name: 'tier1', ...TIERS.tier1 };
 }
 
 /**
@@ -70,7 +81,7 @@ function calculateTier(amount) {
  * @returns {number} Duration in milliseconds
  */
 function getTierDuration(tierName) {
-    return TIERS[tierName]?.duration || TIERS.basic.duration;
+    return TIERS[tierName]?.duration || TIERS.tier1.duration;
 }
 
 module.exports = {

@@ -124,6 +124,7 @@ export const ALERT_ASSETS = {
     PROFESSIONAL: 'https://assets.mixkit.co/active_storage/sfx/1000/1000-preview.mp3',
     CINEMATIC: 'https://assets.mixkit.co/active_storage/sfx/1653/1653-preview.mp3', // Epic boom
     LEGENDARY: 'https://assets.mixkit.co/active_storage/sfx/1110/1110-preview.mp3', // Super epic transformation/win
+    DIAMOND: 'https://assets.mixkit.co/active_storage/sfx/1110/1110-preview.mp3', // Diamond tier uses same epic sound
     CINEMATIC_MUSIC: 'https://assets.mixkit.co/music/preview/mixkit-celebration-606.mp3'
 };
 
@@ -133,5 +134,6 @@ export const BACKGROUND_ASSETS = {
     MEDIUM: 'https://cdn.pixabay.com/video/2023/10/20/185792-876387995_tiny.mp4',     // Cyber blue digital
     PROFESSIONAL: 'https://cdn.pixabay.com/video/2021/09/01/87243-597551522_tiny.mp4', // Deep purple ethereal
     CINEMATIC: 'https://cdn.pixabay.com/video/2022/11/04/137651-766795861_tiny.mp4',    // Orange/Fire abstract
-    LEGENDARY: 'https://cdn.pixabay.com/video/2023/10/16/185208-875150826_tiny.mp4'      // Dark intense crimson
+    LEGENDARY: 'https://cdn.pixabay.com/video/2023/10/16/185208-875150826_tiny.mp4',     // Dark intense crimson
+    DIAMOND: 'https://cdn.pixabay.com/video/2023/10/16/185208-875150826_tiny.mp4'         // Diamond tier - intense
 };

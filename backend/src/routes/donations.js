@@ -409,7 +409,7 @@ async function donationRoutes(fastify, options) {
             const { donor_name: vName, amount: vAmount, message: vMessage } = validation.data;
             const tierInfo = calculateTier(vAmount);
 
-            // إنشاء التبرع في قاعدة البيانات
+            // إنشاء التبرع في قاعدة البيانات (status = 'live' لأنه يُرسل فوراً)
             const { data: donation, error } = await supabase
                 .from('donations')
                 .insert([{
@@ -417,7 +417,8 @@ async function donationRoutes(fastify, options) {
                     amount: vAmount,
                     message: vMessage,
                     tier: tierInfo.name,
-                    status: 'pending'
+                    status: 'live',
+                    displayed_at: new Date().toISOString()
                 }])
                 .select()
                 .single();

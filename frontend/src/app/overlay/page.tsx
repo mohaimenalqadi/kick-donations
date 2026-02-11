@@ -18,6 +18,7 @@ import MediumTier from '@/components/overlay/MediumTier';
 import ProfessionalTier from '@/components/overlay/ProfessionalTier';
 import CinematicTier from '@/components/overlay/CinematicTier';
 import GoldTier from '@/components/overlay/GoldTier';
+import DiamondTier from '@/components/overlay/DiamondTier';
 import Leaderboard from '@/components/overlay/Leaderboard';
 import StandbyScreen from '@/components/overlay/StandbyScreen';
 import { api, type Donation } from '@/lib/api';
@@ -315,16 +316,23 @@ export default function OverlayPage() {
         const uniqueKey = `donation-${donationToDisplay.id || Date.now()}`;
 
         switch (donationToDisplay.tier) {
+            case 'tier1':
             case 'basic':
                 return <BasicTier key={uniqueKey} {...props} />;
+            case 'tier2':
             case 'medium':
                 return <MediumTier key={uniqueKey} {...props} />;
+            case 'tier3':
             case 'professional':
                 return <ProfessionalTier key={uniqueKey} {...props} />;
+            case 'tier4':
             case 'cinematic':
                 return <CinematicTier key={uniqueKey} {...props} />;
+            case 'tier5':
             case 'legendary':
                 return <GoldTier key={uniqueKey} {...props} />;
+            case 'tier6':
+                return <DiamondTier key={uniqueKey} {...props} />;
             default:
                 return <BasicTier key={uniqueKey} {...props} />;
         }
