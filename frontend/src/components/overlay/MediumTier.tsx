@@ -33,7 +33,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
-        }, duration || 30000);
+        }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
@@ -80,8 +80,8 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-black/40" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[4vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[1.5vh]">
+                <div className="flex flex-col items-center gap-[8vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[2.5vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
@@ -90,7 +90,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ duration: 0.8 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase">
+                                    <h2 className="text-[clamp(3rem,7vw,7rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -105,9 +105,9 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(4rem,10vw,10rem)] font-black text-[#fbbf24] drop-shadow-[0_0_30px_rgba(251,191,36,0.5)] leading-none">
+                                    <span className="text-[clamp(5rem,12vw,12rem)] font-black text-[#ff007f] drop-shadow-[0_0_40px_rgba(255,0,127,0.5)] leading-none">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.2rem,3vw,3.5rem)] text-[#fbbf24]/80 font-black ml-4">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,3.5vw,4rem)] text-[#ff007f]/80 font-black ml-4">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -120,10 +120,10 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="max-w-3xl px-10 py-5 bg-black/50 backdrop-blur-xl rounded-3xl border border-white/10"
+                                className="max-w-4xl px-12 py-6 bg-black/50 backdrop-blur-xl rounded-[40px] border border-white/10"
                             >
-                                <p className="text-[clamp(1.1rem,2.2vw,2.5rem)] text-white font-medium italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                                    "{message}"
+                                <p className="text-[clamp(1.3rem,2.8vw,3rem)] text-white font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] leading-relaxed">
+                                    {message}
                                 </p>
                             </motion.div>
                         )}

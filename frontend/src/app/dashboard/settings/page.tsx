@@ -331,6 +331,22 @@ export default function SettingsPage() {
                                                     />
                                                 </div>
                                                 <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">الحد الأدنى (دينار)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={tier.min_amount}
+                                                        onChange={(e) => {
+                                                            const newTiers = [...localTiers];
+                                                            newTiers[idx].min_amount = Number(e.target.value);
+                                                            setLocalTiers(newTiers);
+                                                        }}
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-[#03e115] font-black focus:outline-none focus:border-[#03e115]/30 transition-all text-right"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-4">
                                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">اللون الأساسي (HEX)</label>
                                                     <div className="flex gap-4">
                                                         <input
@@ -355,6 +371,26 @@ export default function SettingsPage() {
                                                         />
                                                     </div>
                                                 </div>
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">مدة العرض (ثواني)</label>
+                                                    <div className="flex items-center gap-6">
+                                                        <input
+                                                            type="range"
+                                                            min="5"
+                                                            max="600"
+                                                            value={tier.duration / 1000}
+                                                            onChange={(e) => {
+                                                                const newTiers = [...localTiers];
+                                                                newTiers[idx].duration = Number(e.target.value) * 1000;
+                                                                setLocalTiers(newTiers);
+                                                            }}
+                                                            className="flex-1 accent-[#03e115] cursor-pointer"
+                                                        />
+                                                        <span className="w-20 text-center bg-black/40 border border-white/5 rounded-xl py-2 font-black text-[#03e115]">
+                                                            {tier.duration / 1000}ث
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-6">
@@ -371,27 +407,6 @@ export default function SettingsPage() {
                                                         }}
                                                         className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white font-mono text-xs focus:outline-none focus:border-[#03e115]/30 transition-all"
                                                     />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">مدة العرض (ثواني)</label>
-                                                <div className="flex items-center gap-6">
-                                                    <input
-                                                        type="range"
-                                                        min="5"
-                                                        max="600"
-                                                        value={tier.duration / 1000}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...localTiers];
-                                                            newTiers[idx].duration = Number(e.target.value) * 1000;
-                                                            setLocalTiers(newTiers);
-                                                        }}
-                                                        className="flex-1 accent-[#03e115] cursor-pointer"
-                                                    />
-                                                    <span className="w-20 text-center bg-black/40 border border-white/5 rounded-xl py-2 font-black text-[#03e115]">
-                                                        {tier.duration / 1000}ث
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

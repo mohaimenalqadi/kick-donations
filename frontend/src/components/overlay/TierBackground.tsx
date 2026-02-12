@@ -14,14 +14,15 @@ interface TierBackgroundProps {
  * Handles both video (MP4/WebM) and image (GIF/PNG/JPG) backgrounds.
  * Prioritizes the provided 'url' (from settings) and falls back to 'fallbackUrl'.
  */
-export default function TierBackground({ url, fallbackUrl, opacity = 1, volume = 0 }: TierBackgroundProps) {
+export default function TierBackground({ url, fallbackUrl, opacity = 1, volume = 100 }: TierBackgroundProps) {
     const finalUrl = url || fallbackUrl;
     const videoRef = React.useRef<HTMLVideoElement>(null);
 
     // Sync volume with video ref
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.volume = (volume || 80) / 100;
+            // Use 100% volume by default unless specified
+            videoRef.current.volume = (volume) / 100;
         }
     }, [volume]);
 
@@ -49,7 +50,6 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
             lowerUrl.includes('vimeo.com') ||
             lowerUrl.includes('youtube.com/embed');
 
-        console.log('[TierBackground] isVideo detection:', { detected, url: finalUrl });
         return detected;
     }, [finalUrl]);
 
@@ -59,20 +59,20 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
         const lowerUrl = finalUrl.toLowerCase();
         return lowerUrl.includes('giphy.com') ||
             lowerUrl.includes('tenor.com') ||
-            lowerUrl.includes('.gif');
-        lowerUrl.endsWith('.gif');
+            lowerUrl.includes('.gif') ||
+            lowerUrl.endsWith('.gif');
     }, [finalUrl]);
 
     if (isVideo && !isKnownGif) {
         return (
-            <div className="absolute inset-0 z-0 bg-black overflow-hidden">
+            <div className="absolute inset-0 z-0 overflow-hidden">
                 <video
                     ref={videoRef}
                     key={finalUrl}
                     src={finalUrl}
                     autoPlay
                     loop
-                    muted={false}
+                    muted={false} // Ensure sound is ON
                     playsInline
                     className="w-full h-full object-cover"
                     style={{ opacity }}
@@ -89,7 +89,7 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
     }
 
     return (
-        <div className="absolute inset-0 z-0 bg-black overflow-hidden">
+        <div className="absolute inset-0 z-0 overflow-hidden">
             <img
                 key={finalUrl}
                 src={finalUrl}

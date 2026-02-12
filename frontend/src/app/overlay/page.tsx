@@ -280,11 +280,13 @@ export default function OverlayPage() {
 
     // Render tier component based on donation tier
     const renderDonation = () => {
-        if (!isUnlocked || !isProcessing) return null;
+        if (!isUnlocked) return null;
+
+        if (!isProcessing || !currentDonation) {
+            return <StandbyScreen key="standby" />;
+        }
 
         const donationToDisplay = currentDonation;
-
-        if (!donationToDisplay) return null;
 
         // Match settings by tier key
         const currentTierSettings = tierSettings.find(t => t.tier_key === donationToDisplay.tier);
@@ -405,11 +407,6 @@ export default function OverlayPage() {
                 )}
             </AnimatePresence>
 
-            {/* Standby Layer (Kick Green) - Base layer to prevent white flash */}
-            {isUnlocked && (
-                <div className="fixed inset-0 z-0 bg-[#03e115]" />
-            )}
-
             {/* Status indicators (Relocated to bottom-right for clean HUD) */}
             <div className={`fixed bottom-6 right-6 z-50 pointer-events-none transition-opacity duration-1000 ${isUnlocked ? 'opacity-20' : 'opacity-0'}`}>
                 <div className={`w-3 h-3 rounded-full ${isSocketConnected ? 'bg-[#03e115]' : 'bg-red-500'} animate-pulse`} />
@@ -418,7 +415,7 @@ export default function OverlayPage() {
 
             {/* Main Donation Stage */}
             <div className="flex items-center justify-center min-h-screen">
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                     {renderDonation()}
                 </AnimatePresence>
             </div>

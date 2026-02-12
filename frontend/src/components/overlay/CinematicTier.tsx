@@ -31,7 +31,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
-        }, duration || 180000);
+        }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
@@ -75,17 +75,17 @@ export default function CinematicTier({ donorName, amount, message, duration, on
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[4vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[2vh]">
+                <div className="flex flex-col items-center gap-[12vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 50, opacity: 0, scale: 0.9, filter: 'blur(20px)' }}
+                                    initial={{ y: 80, opacity: 0, scale: 1.2, filter: 'blur(20px)' }}
                                     animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                    transition={{ duration: 1 }}
+                                    transition={{ duration: 1.2, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.9)] uppercase">
+                                    <h2 className="text-[clamp(4rem,10vw,10rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_40px_rgba(0,0,0,0.9)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -95,15 +95,15 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.6, opacity: 0, filter: 'blur(30px)' }}
+                                    initial={{ scale: 2, opacity: 0, filter: 'blur(30px)' }}
                                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                                    transition={{ type: "spring", stiffness: 80, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(6rem,16vw,16rem)] font-black text-[#fbbf24] drop-shadow-[0_0_50px_rgba(251,191,36,0.7)] leading-none flex items-center gap-8">
+                                    <span className="text-[clamp(7rem,16vw,16rem)] font-black text-[#ff007f] drop-shadow-[0_0_60px_rgba(255,0,127,0.7)] leading-none text-glow-subtle">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#fbbf24]/80 font-black italic drop-shadow-[0_0_25px_rgba(251,191,36,0.5)]">د.ل</span>
-                                    </motion.span>
+                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#ff007f]/90 font-black ml-8">د.ل</span>
+                                    </span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -111,14 +111,16 @@ export default function CinematicTier({ donorName, amount, message, duration, on
 
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
-                            <motion.p
-                                initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                transition={{ delay: 0.6 }}
-                                className="text-[clamp(1.2rem,2.5vw,3rem)] text-white font-bold italic max-w-[65vw] mt-8 bg-black/50 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)]"
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8, y: 100 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ delay: 0.7, duration: 1 }}
+                                className="max-w-6xl px-16 py-10 bg-black/70 backdrop-blur-3xl rounded-[64px] border border-white/10"
                             >
-                                "{message}"
-                            </motion.p>
+                                <p className="text-[clamp(1.6rem,3.5vw,4rem)] text-white font-bold drop-shadow-[0_2px_20px_rgba(0,0,0,0.7)] leading-relaxed">
+                                    {message}
+                                </p>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS donations (
     donor_name VARCHAR(100) NOT NULL,
     amount DECIMAL(10,2) NOT NULL CHECK (amount > 0 AND amount <= 10000),
     message TEXT DEFAULT '',
-    tier VARCHAR(20) NOT NULL CHECK (tier IN ('basic', 'medium', 'professional', 'cinematic', 'legendary')),
+    tier VARCHAR(20) NOT NULL CHECK (tier IN ('tier1', 'tier2', 'tier3', 'tier4', 'tier5', 'tier6')),
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'live', 'done')),
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),

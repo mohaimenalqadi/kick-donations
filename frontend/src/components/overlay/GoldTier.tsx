@@ -33,7 +33,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
-        }, duration || 300000);
+        }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
@@ -79,19 +79,19 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/80" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-8">
-                    <div className="flex flex-col items-center gap-[2vh] relative">
+                <div className="flex flex-col items-center gap-[15vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 60, opacity: 0, scale: 0.8, filter: 'blur(30px)' }}
-                                    animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                    transition={{ duration: 1.2, ease: "easeOut" }}
-                                    className="flex flex-col items-center gap-4 relative z-10"
+                                    initial={{ y: 100, opacity: 0, filter: 'blur(30px)' }}
+                                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    className="flex flex-col items-center gap-4"
                                 >
-                                    <h1 className="text-[clamp(4.5rem,11vw,12rem)] font-black text-white tracking-tighter uppercase leading-none drop-shadow-[0_2px_30px_rgba(0,0,0,1)]">
+                                    <h2 className="text-[clamp(4.5rem,11vw,11rem)] font-black text-white tracking-[0.2em] leading-none drop-shadow-[0_5px_50px_rgba(0,0,0,0.9)] uppercase">
                                         {donorName}
-                                    </h1>
+                                    </h2>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -99,15 +99,15 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(40px)' }}
+                                    initial={{ scale: 0.2, opacity: 0, filter: 'blur(50px)' }}
                                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                                    className="flex flex-col items-center relative z-10"
+                                    transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                                    className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(7rem,20vw,22rem)] font-black text-[#fbbf24] leading-none drop-shadow-[0_0_60px_rgba(251,191,36,0.8)]">
+                                    <span className="text-[clamp(8rem,20vw,20rem)] font-black text-[#ff007f] drop-shadow-[0_0_80px_rgba(255,0,127,0.8)] leading-none text-sovereign-shadow">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#fbbf24]/90 font-black ml-8 drop-shadow-[0_0_50px_rgba(251,191,36,0.6)]">د.ل</span>
-                                    </motion.span>
+                                        <span className="text-[clamp(2.5rem,6vw,6rem)] text-[#ff007f]/90 font-black ml-10">د.ل</span>
+                                    </span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -116,13 +116,13 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 40, filter: 'blur(10px)' }}
-                                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                                transition={{ delay: 0.8, duration: 1 }}
-                                className="max-w-6xl px-16 py-8 bg-black/60 backdrop-blur-3xl rounded-[48px] border border-white/20 shadow-2xl"
+                                initial={{ opacity: 0, scale: 0.5, filter: 'blur(20px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                transition={{ delay: 1, duration: 1 }}
+                                className="max-w-7xl px-20 py-12 bg-black/80 backdrop-blur-[50px] rounded-[80px] border border-white/20 shadow-[0_0_100px_rgba(0,0,0,0.5)]"
                             >
-                                <p className="text-[clamp(1.5rem,3vw,4rem)] text-white font-bold italic drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)] leading-relaxed">
-                                    "{message}"
+                                <p className="text-[clamp(1.8rem,4vw,4.5rem)] text-white font-bold drop-shadow-[0_2px_25px_rgba(0,0,0,0.8)] leading-relaxed">
+                                    {message}
                                 </p>
                             </motion.div>
                         )}

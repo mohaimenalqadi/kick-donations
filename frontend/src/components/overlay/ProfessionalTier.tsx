@@ -33,7 +33,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
-        }, duration || 60000);
+        }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
@@ -80,16 +80,17 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[4vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[2vh]">
+                <div className="flex flex-col items-center gap-[10vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[3vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 40, opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-                                    animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                    initial={{ y: 50, opacity: 0, scale: 0.8 }}
+                                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                                    transition={{ duration: 1 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase">
+                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-widest leading-none drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -99,15 +100,15 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.6, opacity: 0, filter: 'blur(20px)' }}
+                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(20px)' }}
                                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                                    className="flex flex-col items-center relative"
+                                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                                    className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(4.5rem,12vw,12rem)] font-extrabold text-[#fbbf24] drop-shadow-[0_0_40px_rgba(251,191,36,0.6)] leading-none relative z-10">
+                                    <span className="text-[clamp(6rem,14vw,14rem)] font-black text-[#ff007f] drop-shadow-[0_0_50px_rgba(255,0,127,0.6)] leading-none">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,4vw,4rem)] text-[#fbbf24]/80 font-black ml-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">د.ل</span>
-                                    </motion.span>
+                                        <span className="text-[clamp(1.8rem,4vw,4.5rem)] text-[#ff007f]/90 font-black ml-6">د.ل</span>
+                                    </span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -116,13 +117,13 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                transition={{ delay: 0.5 }}
-                                className="max-w-4xl px-12 py-6 bg-black/60 backdrop-blur-2xl rounded-[32px] border border-white/10"
+                                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.8 }}
+                                className="max-w-5xl px-14 py-8 bg-black/60 backdrop-blur-2xl rounded-[48px] border border-white/10"
                             >
-                                <p className="text-[clamp(1.2rem,2.5vw,3rem)] text-white font-semibold italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                                    "{message}"
+                                <p className="text-[clamp(1.5rem,3vw,3.5rem)] text-white font-bold drop-shadow-[0_2px_15px_rgba(0,0,0,0.6)] leading-relaxed">
+                                    {message}
                                 </p>
                             </motion.div>
                         )}

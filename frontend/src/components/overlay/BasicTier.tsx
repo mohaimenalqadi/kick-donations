@@ -33,7 +33,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
-        }, duration || 10000);
+        }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
@@ -80,8 +80,8 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[3vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[1vh]">
+                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[3vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
@@ -90,7 +90,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                     transition={{ duration: 0.6 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(2rem,5vw,5rem)] font-black text-white tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] uppercase">
+                                    <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-black text-white tracking-tight leading-none drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -105,9 +105,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                     transition={{ type: "spring", stiffness: 150, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(3.5rem,8vw,8rem)] font-black text-[#fbbf24] drop-shadow-[0_0_20px_rgba(251,191,36,0.4)] leading-none">
+                                    <span className="text-[clamp(4rem,9vw,9rem)] font-black text-[#ff007f] drop-shadow-[0_0_30px_rgba(255,0,127,0.4)] leading-none">
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1rem,2.5vw,2.5rem)] text-[#fbbf24]/80 font-black ml-4">د.ل</span>
+                                        <span className="text-[clamp(1.2rem,3vw,3rem)] text-[#ff007f]/80 font-black ml-4">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -120,10 +120,10 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.3 }}
-                                className="max-w-2xl px-8 py-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/5"
+                                className="max-w-3xl px-12 py-6 bg-black/40 backdrop-blur-md rounded-[32px] border border-white/5"
                             >
-                                <p className="text-[clamp(1rem,2vw,2rem)] text-white font-medium italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)]">
-                                    "{message}"
+                                <p className="text-[clamp(1.2rem,2.5vw,2.5rem)] text-white font-bold drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] leading-relaxed">
+                                    {message}
                                 </p>
                             </motion.div>
                         )}
