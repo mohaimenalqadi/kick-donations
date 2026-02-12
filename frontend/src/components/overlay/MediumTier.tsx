@@ -77,8 +77,6 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-black/40" />
-
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[8vh] w-full text-center px-4">
                     <div className="flex flex-col items-center gap-[2.5vh]">
@@ -120,9 +118,9 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="max-w-4xl px-12 py-6 bg-black/50 backdrop-blur-xl rounded-[40px] border border-white/10"
+                                className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.3rem,2.8vw,3rem)] text-white font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] leading-relaxed">
+                                <p className="text-[clamp(1.8rem,3.5vw,4rem)] text-white font-black drop-shadow-[0_4px_30px_rgba(0,0,0,1)] leading-relaxed">
                                     {message}
                                 </p>
                             </motion.div>

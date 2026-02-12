@@ -341,7 +341,9 @@ export default function OverlayPage() {
     };
 
     return (
-        <main className="relative w-full h-screen overflow-hidden bg-[#0a0a0a] font-black rtl">
+        <main className="relative w-full h-screen overflow-hidden bg-transparent font-black rtl">
+            {/* Base Layer: Standby Screen (Always present behind everything to ensure green continuity) */}
+            <StandbyScreen />
             {/* Top HUD Header (Symmetric Layout) */}
             <div className="fixed top-10 left-10 right-10 flex justify-between items-start pointer-events-none z-[60]">
                 {/* Left Side: Leaderboard (Only show during active support alerts) */}
@@ -415,8 +417,8 @@ export default function OverlayPage() {
 
             {/* Main Donation Stage */}
             <div className="flex items-center justify-center min-h-screen">
-                <AnimatePresence>
-                    {renderDonation()}
+                <AnimatePresence mode="popLayout">
+                    {currentDonation && renderDonation()}
                 </AnimatePresence>
             </div>
         </main>

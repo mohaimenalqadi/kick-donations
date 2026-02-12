@@ -77,8 +77,6 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
-
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
                     <div className="flex flex-col items-center gap-[3vh]">
@@ -120,9 +118,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.3 }}
-                                className="max-w-3xl px-12 py-6 bg-black/40 backdrop-blur-md rounded-[32px] border border-white/5"
+                                className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.2rem,2.5vw,2.5rem)] text-white font-bold drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] leading-relaxed">
+                                <p className="text-[clamp(1.5rem,3vw,3.5rem)] text-white font-black drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-relaxed">
                                     {message}
                                 </p>
                             </motion.div>

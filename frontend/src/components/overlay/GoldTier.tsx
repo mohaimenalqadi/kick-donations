@@ -76,8 +76,6 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/80" />
-
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[15vh] w-full text-center px-4">
                     <div className="flex flex-col items-center gap-[4vh]">
@@ -119,9 +117,9 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 initial={{ opacity: 0, scale: 0.5, filter: 'blur(20px)' }}
                                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                 transition={{ delay: 1, duration: 1 }}
-                                className="max-w-7xl px-20 py-12 bg-black/80 backdrop-blur-[50px] rounded-[80px] border border-white/20 shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+                                className="max-w-7xl"
                             >
-                                <p className="text-[clamp(1.8rem,4vw,4.5rem)] text-white font-bold drop-shadow-[0_2px_25px_rgba(0,0,0,0.8)] leading-relaxed">
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_60px_rgba(0,0,0,1)] leading-relaxed">
                                     {message}
                                 </p>
                             </motion.div>

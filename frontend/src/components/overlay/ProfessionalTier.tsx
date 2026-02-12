@@ -77,8 +77,6 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                 volume={volume}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40" />
-
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[10vh] w-full text-center px-4">
                     <div className="flex flex-col items-center gap-[3vh]">
@@ -120,9 +118,9 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ delay: 0.5, duration: 0.8 }}
-                                className="max-w-5xl px-14 py-8 bg-black/60 backdrop-blur-2xl rounded-[48px] border border-white/10"
+                                className="max-w-5xl"
                             >
-                                <p className="text-[clamp(1.5rem,3vw,3.5rem)] text-white font-bold drop-shadow-[0_2px_15px_rgba(0,0,0,0.6)] leading-relaxed">
+                                <p className="text-[clamp(2rem,4vw,4.5rem)] text-white font-black drop-shadow-[0_4px_40px_rgba(0,0,0,1)] leading-relaxed">
                                     {message}
                                 </p>
                             </motion.div>

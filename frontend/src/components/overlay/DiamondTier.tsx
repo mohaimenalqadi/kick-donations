@@ -159,9 +159,9 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                                 initial={{ opacity: 0, scale: 0.9, y: 30, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
                                 transition={{ delay: 0.6, duration: 0.8 }}
-                                className="max-w-7xl px-20 py-12 bg-gradient-to-r from-fuchsia-900/40 via-black/60 to-fuchsia-900/40 backdrop-blur-3xl rounded-[80px] border border-fuchsia-400/30 shadow-[0_0_80px_rgba(232,121,249,0.2)]"
+                                className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2rem,4.5vw,5rem)] text-white font-bold drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] leading-relaxed">
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_80px_rgba(232,121,249,0.8)] leading-relaxed">
                                     {message}
                                 </p>
                             </motion.div>
