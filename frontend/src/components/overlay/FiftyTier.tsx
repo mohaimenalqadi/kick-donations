@@ -13,9 +13,10 @@ interface FiftyTierProps {
     color?: string;
     backgroundUrl?: string;
     duration?: number;
+    onComplete?: () => void;
 }
 
-export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000 }: FiftyTierProps) {
+export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000, onComplete }: FiftyTierProps) {
     const count = useSpring(0, { stiffness: 90, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
@@ -32,11 +33,17 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
             count.set(amount);
         }, 8500);
 
+        // Phase 3: Completion (Duration)
+        const completeTimer = setTimeout(() => {
+            if (onComplete) onComplete();
+        }, duration);
+
         return () => {
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
+            clearTimeout(completeTimer);
         };
-    }, [amount, count]);
+    }, [amount, count, duration, onComplete]);
 
     return (
         <div className="fixed inset-0 w-screen h-screen flex items-center justify-center overflow-hidden">

@@ -346,6 +346,7 @@ export default function OverlayPage() {
                         color={donationToDisplay.color}
                         backgroundUrl={props.backgroundUrl}
                         duration={props.duration}
+                        onComplete={props.onComplete}
                     />
                 );
             default:
