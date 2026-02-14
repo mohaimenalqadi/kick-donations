@@ -75,10 +75,10 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                 />
             </div>
 
-            {/* --- DATA CONTAINER (FiftyTier Style) --- */}
+            {/* --- DATA CONTAINER (Standardized Spec) --- */}
             <div className="flex flex-col items-center gap-[6vh] text-center w-full relative z-10">
 
-                <div className="flex flex-col items-center gap-[4vh]">
+                <div className="flex flex-col items-center gap-[2vh]">
                     {/* Donor Name */}
                     <AnimatePresence mode="wait">
                         {showName && (
@@ -86,7 +86,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 initial={{ scale: 0.5, y: -50, opacity: 0 }}
                                 animate={{ scale: [0.5, 1.25, 1], y: 0, opacity: 1 }}
                                 transition={{ duration: 0.8, ease: "easeOut" }}
-                                className="text-[clamp(5rem,9vw,9.5rem)] font-black text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.95)] break-words max-w-[90vw] leading-tight uppercase"
+                                className="text-[clamp(3rem,8vw,8rem)] font-black text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.95)] break-words max-w-[90vw] leading-tight uppercase"
                             >
                                 {donorName}
                             </motion.div>
@@ -100,14 +100,24 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 initial={{ scale: 0.3, opacity: 0 }}
                                 animate={{ scale: [0.3, 1.4, 1], opacity: 1 }}
                                 transition={{ type: "spring", stiffness: 150, damping: 15 }}
-                                className="text-[clamp(7rem,14vw,14rem)] font-black leading-none p-4"
-                                style={{
-                                    color: '#ff007f', // Unified Color (Pink/Magenta)
-                                    textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
-                                }}
+                                className="flex items-center justify-center"
                             >
-                                <motion.span>{rounded}</motion.span>
-                                <span className="text-[clamp(2.5rem,5vw,6rem)] align-middle ml-4 text-white">د.ل</span>
+                                <span className="text-[clamp(5rem,13vw,13rem)] font-black leading-none"
+                                    style={{
+                                        color: '#ff007f', // Unified Color (Pink/Magenta)
+                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
+                                    }}
+                                >
+                                    <motion.span>{rounded}</motion.span>
+                                </span>
+                                <span className="text-[clamp(2.5rem,6vw,6rem)] font-black ml-4 align-middle"
+                                    style={{
+                                        color: '#ff007f', // Unified Label Color
+                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
+                                    }}
+                                >
+                                    د.ل
+                                </span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -120,9 +130,9 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                             initial={{ scale: 0.5, y: 30, opacity: 0 }}
                             animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
                             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
-                            className="max-w-7xl"
+                            className="max-w-[90vw]"
                         >
-                            <p className="text-[clamp(1.5rem,4.5vw,5.5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.8)] break-words max-w-[95vw]">
+                            <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.8)] break-words">
                                 "{message}"
                             </p>
                         </motion.div>

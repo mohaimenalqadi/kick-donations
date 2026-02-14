@@ -77,19 +77,19 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
             />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[4vh]">
+                {/* --- DATA CONTAINER (Standardized Spec) --- */}
+                <div className="flex flex-col items-center gap-[6vh] text-center w-full px-4">
+
+                    <div className="flex flex-col items-center gap-[2vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
                                     initial={{ scale: 0.3, y: 100, opacity: 0, filter: 'blur(30px)' }}
                                     animate={{ scale: [0.3, 1.2, 1], y: 0, opacity: 1, filter: 'blur(0px)' }}
                                     transition={{ duration: 1.5, ease: "easeOut" }}
-                                    className="flex flex-col items-center gap-4"
+                                    className="text-[clamp(3rem,8vw,8rem)] font-black text-white tracking-[0.05em] leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[90vw]"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,9.5vw,9.5rem)] font-black text-white tracking-[0.05em] leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
-                                        {donorName}
-                                    </h2>
+                                    {donorName}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -100,16 +100,23 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                     initial={{ scale: 0.2, opacity: 0, filter: 'blur(20px)' }}
                                     animate={{ scale: [0.2, 1.35, 1], opacity: 1, filter: 'blur(0px)' }}
                                     transition={{ type: "spring", stiffness: 150, damping: 15 }}
-                                    className="flex flex-col items-center"
+                                    className="flex items-center justify-center"
                                 >
-                                    <span className="text-[clamp(6rem,14vw,14rem)] font-black leading-none"
+                                    <span className="text-[clamp(5rem,13vw,13rem)] font-black leading-none"
                                         style={{
-                                            color: '#ff007f', // Unified Color (Pink/Magenta)
+                                            color: '#ff007f',
                                             textShadow: '0 0 50px rgba(255,0,127,0.7), 0 12px 0 #4d0026'
                                         }}
                                     >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.8rem,4vw,4.5rem)] opacity-90 font-black ml-6">د.ل</span>
+                                    </span>
+                                    <span className="text-[clamp(2.5rem,6vw,6rem)] font-black ml-4 align-middle"
+                                        style={{
+                                            color: '#ff007f', // Unified Label Color
+                                            textShadow: '0 0 50px rgba(255,0,127,0.7), 0 12px 0 #4d0026'
+                                        }}
+                                    >
+                                        د.ل
                                     </span>
                                 </motion.div>
                             )}
@@ -122,9 +129,9 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 initial={{ opacity: 0, scale: 0.3, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.5 }}
-                                className="max-w-7xl"
+                                className="max-w-[90vw]"
                             >
-                                <p className="text-[clamp(1.5rem,5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words">
                                     "{message}"
                                 </p>
                             </motion.div>

@@ -48,9 +48,10 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                 />
             </div>
 
-            {/* Content Area */}
+            {/* --- DATA CONTAINER (Standardized Spec) --- */}
             <div className="z-10 flex flex-col items-center gap-[6vh] w-full text-center px-4 pointer-events-none">
-                <div className="flex flex-col items-center gap-[4vh]">
+
+                <div className="flex flex-col items-center gap-[2vh]">
                     {/* Donor Name */}
                     <AnimatePresence mode="wait">
                         {showName && (
@@ -65,7 +66,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                         )}
                     </AnimatePresence>
 
-                    {/* Amount - MEGA Styled */}
+                    {/* Amount */}
                     <AnimatePresence mode="wait">
                         {showAmount && (
                             <motion.div
@@ -77,13 +78,24 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                                     damping: 15,
                                     delay: 0
                                 }}
-                                className="text-[clamp(6rem,14vw,14rem)] font-black leading-none p-4"
-                                style={{
-                                    color: '#ff007f',
-                                    textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
-                                }}
+                                className="flex items-center justify-center"
                             >
-                                <motion.span>{rounded}</motion.span> <span className="text-[clamp(2rem,4vw,5rem)] align-middle ml-4">د.ل</span>
+                                <span className="text-[clamp(5rem,13vw,13rem)] font-black leading-none"
+                                    style={{
+                                        color: '#ff007f',
+                                        textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
+                                    }}
+                                >
+                                    <motion.span>{rounded}</motion.span>
+                                </span>
+                                <span className="text-[clamp(2.5rem,6vw,6rem)] font-black ml-4 align-middle"
+                                    style={{
+                                        color: '#ff007f', // Unified Label Color
+                                        textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
+                                    }}
+                                >
+                                    د.ل
+                                </span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -96,9 +108,11 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                             initial={{ scale: 0.5, y: 30, opacity: 0 }}
                             animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
                             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
-                            className="text-[clamp(1.5rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[95vw]"
+                            className="max-w-[90vw]"
                         >
-                            "{message}"
+                            <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words">
+                                "{message}"
+                            </p>
                         </motion.div>
                     )}
                 </AnimatePresence>

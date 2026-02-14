@@ -112,8 +112,10 @@ export default function DiamondTier({
             </AnimatePresence>
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
+                {/* --- DATA CONTAINER (Standardized Spec) --- */}
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center">
-                    <div className="flex flex-col items-center gap-[4vh] relative">
+
+                    <div className="flex flex-col items-center gap-[2vh] relative">
 
                         {/* Donor Name */}
                         <AnimatePresence mode="wait">
@@ -124,7 +126,7 @@ export default function DiamondTier({
                                     transition={{ duration: 1, ease: "easeOut" }}
                                     className="relative z-10"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8.5vw,8.5rem)] font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
+                                    <h2 className="text-[clamp(3rem,8vw,8rem)] font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -138,16 +140,23 @@ export default function DiamondTier({
                                     initial={{ scale: 0.2, opacity: 0, filter: 'blur(25px)' }}
                                     animate={{ scale: [0.2, 1.4, 1], opacity: 1, filter: 'blur(0px)' }}
                                     transition={{ type: "spring", stiffness: 160, damping: 15 }}
-                                    className="flex flex-col items-center"
+                                    className="flex items-center justify-center"
                                 >
-                                    <span className="text-[clamp(7rem,15vw,15rem)] font-black leading-none"
+                                    <span className="text-[clamp(5rem,13vw,13rem)] font-black leading-none"
                                         style={{
                                             color: color,
                                             textShadow: `0 0 50px ${color}80, 0 12px 0 #4d0026`
                                         }}
                                     >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2rem,4.5vw,5.5rem)] opacity-90 ml-6 font-black">د.ل</span>
+                                    </span>
+                                    <span className="text-[clamp(2.5rem,6vw,6rem)] font-black ml-4 align-middle"
+                                        style={{
+                                            color: color, // Unified Label Color (using prop which is #ff007f)
+                                            textShadow: `0 0 50px ${color}80, 0 12px 0 #4d0026`
+                                        }}
+                                    >
+                                        د.ل
                                     </span>
                                 </motion.div>
                             )}
@@ -161,9 +170,9 @@ export default function DiamondTier({
                                 initial={{ opacity: 0, scale: 0.4, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.4 }}
-                                className="max-w-6xl"
+                                className="max-w-[90vw]"
                             >
-                                <p className="text-[clamp(1.5rem,4.5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words">
                                     "{message}"
                                 </p>
                             </motion.div>
