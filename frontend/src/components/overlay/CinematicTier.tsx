@@ -83,7 +83,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                     transition={{ duration: 1.2, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,9vw,9rem)] font-black text-white tracking-tighter leading-[1.1] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
+                                    <h2 className="text-[clamp(3.5rem,9vw,9.5rem)] font-black text-white tracking-tighter leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -120,7 +120,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 transition={{ delay: 0.7, duration: 1 }}
                                 className="max-w-6xl"
                             >
-                                <p className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>

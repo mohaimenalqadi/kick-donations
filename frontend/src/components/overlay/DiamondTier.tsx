@@ -15,13 +15,24 @@ interface DiamondTierProps {
     soundUrl?: string;
     backgroundUrl?: string;
     volume?: number;
+    color?: string;
 }
 
 /**
  * DIAMOND TIER (40-49 LYD) - THE ULTIMATE ELITE ALERT
- * Stunning diamond-themed visuals with pulsing glow and cinematic entrance.
+ * Standardized typography and layout to match the unified premium theme.
  */
-export default function DiamondTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: DiamondTierProps) {
+export default function DiamondTier({
+    donorName,
+    amount,
+    message,
+    duration,
+    onComplete,
+    soundUrl,
+    backgroundUrl,
+    volume = 80,
+    color = '#ff007f'
+}: DiamondTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
     const [showGlow, setShowGlow] = useState(false);
@@ -34,7 +45,6 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
         const timer = setTimeout(() => {
             onComplete();
         }, duration);
-
         return () => clearTimeout(timer);
     }, [duration, onComplete]);
 
@@ -43,11 +53,13 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
         audioManager.preload('diamond_alert', alertSound);
         audioManager.play('diamond_alert', { volume: (volume / 100) });
 
-        // Phase 1: Diamond Glow Buildup (10s)
+        // Phase 1: Diamond Glow Buildup (8s)
         const glowTimer = setTimeout(() => setShowGlow(true), 8000);
+
+        // Phase 2: Name reveal (10s)
         const nameTimer = setTimeout(() => setShowName(true), 10000);
 
-        // Phase 2: Amount reveal
+        // Phase 3: Amount reveal (12s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
@@ -66,9 +78,9 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden"
+            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden z-[9999]"
         >
-            {/* --- 🌌 HYBRID BACKGROUND (VIDEO/IMAGE) --- */}
+            {/* --- 🌌 BACKGROUND --- */}
             <TierBackground
                 url={backgroundUrl}
                 fallbackUrl={BACKGROUND_ASSETS.LEGENDARY}
@@ -77,7 +89,7 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
             />
 
             {/* Diamond gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-purple-900/20 to-black/70" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-purple-900/20 to-black/70 z-[5]" />
 
             {/* Pulsing diamond glow effect */}
             <AnimatePresence>
@@ -101,8 +113,8 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
             </AnimatePresence>
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
-                <div className="flex flex-col items-center gap-[4vh] w-full text-center">
-                    <div className="flex flex-col items-center gap-[2vh] relative">
+                <div className="flex flex-col items-center gap-[6vh] w-full text-center">
+                    <div className="flex flex-col items-center gap-[3vh] relative">
                         {/* Diamond badge */}
                         <AnimatePresence>
                             {showName && (
@@ -119,23 +131,23 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                             )}
                         </AnimatePresence>
 
+                        {/* Donor Name */}
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
                                     initial={{ y: 50, opacity: 0, scale: 0.8, filter: 'blur(25px)' }}
                                     animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                     transition={{ duration: 1, ease: "easeOut" }}
-                                    className="flex flex-col items-center gap-4 relative z-10"
+                                    className="relative z-10"
                                 >
-                                    <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-white to-fuchsia-300 tracking-tighter uppercase leading-[1.1] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw]"
-                                        style={{ WebkitTextStroke: '1px rgba(232,121,249,0.3)' }}
-                                    >
+                                    <h2 className="text-[clamp(3.5rem,8.5vw,8.5rem)] font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
                                         {donorName}
-                                    </h1>
+                                    </h2>
                                 </motion.div>
                             )}
                         </AnimatePresence>
 
+                        {/* Amount Reveal */}
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
@@ -144,29 +156,30 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                                     transition={{ type: "spring", stiffness: 80, damping: 12 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(8rem,18vw,18rem)] font-black leading-none"
+                                    <span className="text-[clamp(7rem,15vw,15rem)] font-black leading-none"
                                         style={{
-                                            color: '#ff007f',
-                                            textShadow: '0 0 60px rgba(255,0,127,0.8), 0 15px 0 #4d0026'
+                                            color: color,
+                                            textShadow: `0 0 50px ${color}80, 0 12px 0 #4d0026`
                                         }}
                                     >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2.5rem,5vw,6rem)] opacity-90 font-black ml-8">د.ل</span>
+                                        <span className="text-[clamp(2rem,4.5vw,5.5rem)] opacity-90 ml-6 font-black">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
+                    {/* Message */}
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ delay: 0.6, duration: 0.8 }}
-                                className="max-w-7xl"
+                                className="max-w-6xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>
@@ -174,6 +187,12 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                     </AnimatePresence>
                 </div>
             </div>
+
+            {/* Bottom Glow */}
+            <div
+                className="absolute bottom-0 left-0 right-0 h-[40vh] opacity-30 pointer-events-none"
+                style={{ background: `linear-gradient(to top, ${color}, transparent)` }}
+            />
         </motion.div>
     );
 }

@@ -78,8 +78,8 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
             />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[8vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[2.5vh]">
+                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[3vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
@@ -88,7 +88,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ duration: 0.8 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3rem,8vw,8rem)] font-black text-white tracking-tighter leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
+                                    <h2 className="text-[clamp(3.5rem,8.5vw,9.5rem)] font-black text-white tracking-widest leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -106,7 +106,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     <span className="text-[clamp(5rem,12vw,12rem)] font-black leading-none"
                                         style={{
                                             color: '#ff007f',
-                                            textShadow: '0 0 40px rgba(255,0,127,0.5), 0 10px 0 #4d0026'
+                                            textShadow: '0 0 50px rgba(255,0,127,0.7), 0 12px 0 #4d0026'
                                         }}
                                     >
                                         <motion.span>{rounded}</motion.span>
@@ -125,7 +125,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 transition={{ delay: 0.4 }}
                                 className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.8rem,4vw,4rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>
