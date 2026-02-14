@@ -14,7 +14,14 @@ interface TierBackgroundProps {
  * Handles both video (MP4/WebM) and image (GIF/PNG/JPG) backgrounds.
  * Prioritizes the provided 'url' (from settings) and falls back to 'fallbackUrl'.
  */
-export default function TierBackground({ url, fallbackUrl, opacity = 1, volume = 100 }: TierBackgroundProps) {
+export default function TierBackground({
+    url,
+    fallbackUrl,
+    opacity = 1,
+    volume = 100,
+    className = "absolute inset-0 z-0 overflow-hidden",
+    style
+}: TierBackgroundProps & { className?: string; style?: React.CSSProperties }) {
     const finalUrl = url || fallbackUrl;
     const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -65,7 +72,7 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
 
     if (isVideo && !isKnownGif) {
         return (
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className={className} style={style}>
                 <video
                     ref={videoRef}
                     key={finalUrl}
@@ -89,7 +96,7 @@ export default function TierBackground({ url, fallbackUrl, opacity = 1, volume =
     }
 
     return (
-        <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className={className} style={style}>
             <img
                 key={finalUrl}
                 src={finalUrl}

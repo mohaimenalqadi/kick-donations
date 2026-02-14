@@ -67,71 +67,70 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden"
+            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center z-50 px-4"
         >
-            {/* --- 🌌 HYBRID BACKGROUND (VIDEO/IMAGE) --- */}
-            <TierBackground
-                url={backgroundUrl}
-                fallbackUrl={BACKGROUND_ASSETS.MEDIUM}
-                opacity={0.8}
-                volume={volume}
-            />
+            {/* --- MEDIA CONTAINER (Top) --- */}
+            <div className="relative w-[35vw] max-w-[600px] aspect-video rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(250,204,21,0.2)] border-4 border-yellow-400/20 mb-8 bg-black/50">
+                <TierBackground
+                    url={backgroundUrl}
+                    fallbackUrl={BACKGROUND_ASSETS.MEDIUM}
+                    opacity={1}
+                    volume={volume}
+                    className="w-full h-full object-cover"
+                />
+            </div>
 
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[4vh]">
-                        <AnimatePresence mode="wait">
-                            {showName && (
-                                <motion.div
-                                    initial={{ scale: 0.5, y: 30, opacity: 0 }}
-                                    animate={{ scale: [0.5, 1.15, 1], y: 0, opacity: 1 }}
-                                    transition={{ duration: 1, ease: "easeOut" }}
-                                    className="flex flex-col items-center gap-2"
-                                >
-                                    <h2 className="text-[clamp(3.5rem,8.5vw,9.5rem)] font-black text-white tracking-widest leading-tight drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)] uppercase break-words max-w-[95vw]">
-                                        {donorName}
-                                    </h2>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+            {/* --- DATA CONTAINER (Bottom) --- */}
+            <div className="flex flex-col items-center gap-[4vh] text-center w-full relative z-10">
 
-                        <AnimatePresence mode="wait">
-                            {showAmount && (
-                                <motion.div
-                                    initial={{ scale: 0.4, opacity: 0, filter: 'blur(15px)' }}
-                                    animate={{ scale: [0.4, 1.25, 1], opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 130, damping: 15 }}
-                                    className="flex flex-col items-center"
-                                >
-                                    <span className="text-[clamp(5rem,12vw,12rem)] font-black leading-none"
-                                        style={{
-                                            color: '#ff007f',
-                                            textShadow: '0 0 50px rgba(255,0,127,0.7), 0 12px 0 #4d0026'
-                                        }}
-                                    >
-                                        <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,3.5vw,4rem)] opacity-90 font-black ml-4">د.ل</span>
-                                    </span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                {/* Donor Name */}
+                <AnimatePresence mode="wait">
+                    {showName && (
+                        <motion.div
+                            initial={{ scale: 0.2, y: 50, opacity: 0 }}
+                            animate={{ scale: [0.2, 1.15, 1], y: 0, opacity: 1 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                            <h2 className="text-[clamp(4rem,7.5vw,7.5rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_5px_8px_rgba(0,0,0,0.9)]"
+                                style={{ WebkitTextStroke: '2px black' }}>
+                                {donorName}
+                            </h2>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                    <AnimatePresence mode="wait">
-                        {showAmount && message && message.trim() && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.5, y: 30 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.3 }}
-                                className="max-w-4xl"
-                            >
-                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
-                                    "{message}"
-                                </p>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                {/* Amount */}
+                <AnimatePresence mode="wait">
+                    {showAmount && (
+                        <motion.div
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: [0.5, 1.2, 1], opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 140, damping: 20 }}
+                        >
+                            <span className="text-[clamp(5rem,10vw,10rem)] font-black text-yellow-400 leading-none drop-shadow-[0_5px_8px_rgba(0,0,0,0.9)]"
+                                style={{ WebkitTextStroke: '2px black' }}>
+                                <motion.span>{rounded}</motion.span>
+                                <span className="text-[0.6em] ml-2 text-white">د.ل</span>
+                            </span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Message */}
+                <AnimatePresence>
+                    {showAmount && message && message.trim() && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="max-w-5xl"
+                        >
+                            <p className="text-[clamp(1.8rem,3.2vw,3.5rem)] font-bold text-yellow-50/95 leading-tight drop-shadow-md break-words max-w-[90vw]">
+                                "{message}"
+                            </p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </motion.div>
     );
