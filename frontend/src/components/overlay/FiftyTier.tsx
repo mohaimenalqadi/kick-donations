@@ -16,21 +16,21 @@ interface FiftyTierProps {
 }
 
 export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000 }: FiftyTierProps) {
-    const count = useSpring(0, { stiffness: 100, damping: 20 });
+    const count = useSpring(0, { stiffness: 90, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
 
     useEffect(() => {
-        // Phase 1: Name reveal (1.5s)
-        const nameTimer = setTimeout(() => setShowName(true), 1500);
+        // Phase 1: Name reveal (5.5s)
+        const nameTimer = setTimeout(() => setShowName(true), 5500);
 
-        // Phase 2: Amount reveal (3s)
+        // Phase 2: Amount reveal (8.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 3000);
+        }, 8500);
 
         return () => {
             clearTimeout(nameTimer);

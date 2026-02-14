@@ -26,7 +26,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
 
-    const count = useSpring(0, { stiffness: 100, damping: 20 });
+    const count = useSpring(0, { stiffness: 140, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -49,11 +49,11 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
             setShowBorder(true);
         }, 1500);
 
-        // Phase 2: Amount reveal (3s)
+        // Phase 2: Amount reveal (2.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 3000);
+        }, 2500);
 
         return () => {
             audioManager.stop('medium_alert');

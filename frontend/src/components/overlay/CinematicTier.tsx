@@ -24,7 +24,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
 
-    const count = useSpring(0, { stiffness: 110, damping: 20 });
+    const count = useSpring(0, { stiffness: 80, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -41,14 +41,14 @@ export default function CinematicTier({ donorName, amount, message, duration, on
         audioManager.preload('cinematic_alert', alertSound);
         audioManager.play('cinematic_alert', { volume: (volume / 100) });
 
-        // Phase 1: High-Duration Buildup (5s)
-        const nameTimer = setTimeout(() => setShowName(true), 5000);
+        // Phase 1: High-Duration Buildup (8s)
+        const nameTimer = setTimeout(() => setShowName(true), 8000);
 
-        // Phase 2: Amount reveal (8s)
+        // Phase 2: Amount reveal (12s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 8000);
+        }, 12000);
 
         return () => {
             audioManager.stop('cinematic_alert');

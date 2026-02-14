@@ -26,7 +26,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
 
-    const count = useSpring(0, { stiffness: 110, damping: 18 });
+    const count = useSpring(0, { stiffness: 120, damping: 18 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -43,17 +43,17 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
         audioManager.preload('prof_alert', alertSound);
         audioManager.play('prof_alert', { volume: (volume / 100) });
 
-        // Phase 1: Mystery Entry Buildup (3s)
+        // Phase 1: Mystery Entry Buildup (2.5s)
         const nameTimer = setTimeout(() => {
             setShowName(true);
             setShowBorder(true);
-        }, 3000);
+        }, 2500);
 
-        // Phase 2: Amount reveal (5s)
+        // Phase 2: Amount reveal (4s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 5000);
+        }, 4000);
 
         return () => {
             audioManager.stop('prof_alert');

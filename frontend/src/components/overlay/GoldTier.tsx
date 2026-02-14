@@ -26,7 +26,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
     const [showOverlay, setShowOverlay] = useState(false);
 
     // Retuning for "faster" but still professional count
-    const count = useSpring(0, { stiffness: 110, damping: 20 });
+    const count = useSpring(0, { stiffness: 60, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -43,15 +43,15 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
         audioManager.preload('gold_alert', alertSound);
         audioManager.play('gold_alert', { volume: (volume / 100) });
 
-        // Phase 1: Ultimate Suspense (8s)
-        const overlayTimer = setTimeout(() => setShowOverlay(true), 6000);
-        const nameTimer = setTimeout(() => setShowName(true), 8000);
+        // Phase 1: Ultimate Suspense (12s)
+        const overlayTimer = setTimeout(() => setShowOverlay(true), 9000);
+        const nameTimer = setTimeout(() => setShowName(true), 12000);
 
-        // Phase 2: Amount reveal (12s)
+        // Phase 2: Amount reveal (18s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 12000);
+        }, 18000);
 
         return () => {
             audioManager.stop('gold_alert');

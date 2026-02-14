@@ -37,7 +37,7 @@ export default function DiamondTier({
     const [showAmount, setShowAmount] = useState(false);
     const [showGlow, setShowGlow] = useState(false);
 
-    const count = useSpring(0, { stiffness: 120, damping: 22 });
+    const count = useSpring(0, { stiffness: 100, damping: 22 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -56,14 +56,14 @@ export default function DiamondTier({
         // Phase 1: Diamond Glow Buildup (8s)
         const glowTimer = setTimeout(() => setShowGlow(true), 8000);
 
-        // Phase 2: Name reveal (2.5s)
-        const nameTimer = setTimeout(() => setShowName(true), 2500);
+        // Phase 2: Name reveal (4s)
+        const nameTimer = setTimeout(() => setShowName(true), 4000);
 
-        // Phase 3: Amount reveal (4.5s)
+        // Phase 3: Amount reveal (6s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 4500);
+        }, 6000);
 
         return () => {
             audioManager.stop('diamond_alert');

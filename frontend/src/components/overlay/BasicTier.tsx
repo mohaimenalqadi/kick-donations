@@ -26,7 +26,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
 
-    const count = useSpring(0, { stiffness: 100, damping: 20 });
+    const count = useSpring(0, { stiffness: 160, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -43,17 +43,17 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
         audioManager.preload('basic_alert', alertSound);
         audioManager.play('basic_alert', { volume: (volume / 100) });
 
-        // Phase 1: Entry Buildup (1s for Basic)
+        // Phase 1: Entry Buildup (0.8s for Basic)
         const nameTimer = setTimeout(() => {
             setShowName(true);
             setShowBorder(true);
-        }, 1000);
+        }, 800);
 
-        // Phase 2: Amount reveal (2s)
+        // Phase 2: Amount reveal (1.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 2000);
+        }, 1500);
 
         return () => {
             audioManager.stop('basic_alert');
