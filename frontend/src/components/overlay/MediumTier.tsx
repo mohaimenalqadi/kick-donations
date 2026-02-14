@@ -107,8 +107,8 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 transition={{ type: "spring", stiffness: 150, damping: 15 }}
                                 className="text-[clamp(5rem,11vw,11rem)] font-black leading-none p-4"
                                 style={{
-                                    color: '#facc15', // Tier Color (Yellow)
-                                    textShadow: '0 0 45px rgba(250,204,21,0.6), 0 10px 0 #713f12' // Deep shadow matching FiftyTier
+                                    color: '#ff007f', // Unified Color (Pink/Magenta)
+                                    textShadow: '0 0 45px rgba(255,0,127,0.6), 0 10px 0 #713f12'
                                 }}
                             >
                                 <motion.span>{rounded}</motion.span>
@@ -127,7 +127,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
                             className="max-w-5xl"
                         >
-                            <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                            <p className="text-[clamp(1.5rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[95vw]">
                                 "{message}"
                             </p>
                         </motion.div>

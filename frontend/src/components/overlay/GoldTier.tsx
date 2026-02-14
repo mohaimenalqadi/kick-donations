@@ -43,15 +43,15 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
         audioManager.preload('gold_alert', alertSound);
         audioManager.play('gold_alert', { volume: (volume / 100) });
 
-        // Phase 1: Ultimate Suspense (12s)
-        const overlayTimer = setTimeout(() => setShowOverlay(true), 9000);
-        const nameTimer = setTimeout(() => setShowName(true), 12000);
+        // Phase 1: Name reveal (2s - Fast)
+        const overlayTimer = setTimeout(() => setShowOverlay(true), 1500);
+        const nameTimer = setTimeout(() => setShowName(true), 2000);
 
-        // Phase 2: Amount reveal (18s)
+        // Phase 2: Amount reveal (2.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 18000);
+        }, 2500);
 
         return () => {
             audioManager.stop('gold_alert');
@@ -104,7 +104,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 >
                                     <span className="text-[clamp(6rem,14vw,14rem)] font-black leading-none"
                                         style={{
-                                            color: '#ff007f',
+                                            color: '#ff007f', // Unified Color (Pink/Magenta)
                                             textShadow: '0 0 50px rgba(255,0,127,0.7), 0 12px 0 #4d0026'
                                         }}
                                     >
@@ -124,7 +124,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.5 }}
                                 className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(1.5rem,5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>

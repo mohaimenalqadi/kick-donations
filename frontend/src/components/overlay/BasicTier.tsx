@@ -107,8 +107,8 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                 transition={{ type: "spring", stiffness: 150, damping: 15 }}
                                 className="text-[clamp(4.5rem,10vw,10rem)] font-black leading-none p-4"
                                 style={{
-                                    color: '#34d399', // Tier Color (Emerald)
-                                    textShadow: '0 0 40px rgba(52,211,153,0.6), 0 10px 0 #064e3b' // Deep shadow matching FiftyTier style
+                                    color: '#ff007f', // Unified Color (Pink/Magenta)
+                                    textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
                                 }}
                             >
                                 <motion.span>{rounded}</motion.span>
@@ -127,7 +127,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
                             className="max-w-4xl"
                         >
-                            <p className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                            <p className="text-[clamp(1.5rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[95vw]">
                                 "{message}"
                             </p>
                         </motion.div>

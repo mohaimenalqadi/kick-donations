@@ -102,8 +102,8 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 transition={{ type: "spring", stiffness: 150, damping: 15 }}
                                 className="text-[clamp(7rem,14vw,14rem)] font-black leading-none p-4"
                                 style={{
-                                    color: '#f472b6', // Tier Color (Pink/Magenta for Cinematic)
-                                    textShadow: '0 0 55px rgba(244,114,182,0.6), 0 12px 0 #be185d' // Deep shadow matching FiftyTier
+                                    color: '#ff007f', // Unified Color (Pink/Magenta)
+                                    textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
                                 }}
                             >
                                 <motion.span>{rounded}</motion.span>
@@ -122,7 +122,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
                             className="max-w-7xl"
                         >
-                            <p className="text-[clamp(2.5rem,4.5vw,5.5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.8)] break-words max-w-[95vw]">
+                            <p className="text-[clamp(1.5rem,4.5vw,5.5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.8)] break-words max-w-[95vw]">
                                 "{message}"
                             </p>
                         </motion.div>

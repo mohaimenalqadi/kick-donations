@@ -88,8 +88,7 @@ export default function DiamondTier({
                 volume={volume}
             />
 
-            {/* Diamond gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-purple-900/20 to-black/70 z-[5]" />
+            {/* Diamond gradient overlay REMOVED per user request */}
 
             {/* Pulsing diamond glow effect */}
             <AnimatePresence>
@@ -164,7 +163,7 @@ export default function DiamondTier({
                                 transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.4 }}
                                 className="max-w-6xl"
                             >
-                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(1.5rem,4.5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>
