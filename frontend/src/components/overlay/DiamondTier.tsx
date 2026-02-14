@@ -56,14 +56,14 @@ export default function DiamondTier({
         // Phase 1: Diamond Glow Buildup (8s)
         const glowTimer = setTimeout(() => setShowGlow(true), 8000);
 
-        // Phase 2: Name reveal (10s)
-        const nameTimer = setTimeout(() => setShowName(true), 10000);
+        // Phase 2: Name reveal (2.5s)
+        const nameTimer = setTimeout(() => setShowName(true), 2500);
 
-        // Phase 3: Amount reveal (12s)
+        // Phase 3: Amount reveal (4.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 12000);
+        }, 4500);
 
         return () => {
             audioManager.stop('diamond_alert');
@@ -78,7 +78,7 @@ export default function DiamondTier({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden z-[9999]"
+            className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center overflow-hidden z-10"
         >
             {/* --- 🌌 BACKGROUND --- */}
             <TierBackground
@@ -114,7 +114,7 @@ export default function DiamondTier({
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center">
-                    <div className="flex flex-col items-center gap-[3vh] relative">
+                    <div className="flex flex-col items-center gap-[4vh] relative">
 
                         {/* Donor Name */}
                         <AnimatePresence mode="wait">

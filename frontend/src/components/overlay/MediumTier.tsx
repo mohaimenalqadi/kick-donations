@@ -43,17 +43,17 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
         audioManager.preload('medium_alert', alertSound);
         audioManager.play('medium_alert', { volume: (volume / 100) });
 
-        // Phase 1: Entry Buildup (5s for Medium)
+        // Phase 1: Entry Buildup (1.5s for Medium)
         const nameTimer = setTimeout(() => {
             setShowName(true);
             setShowBorder(true);
-        }, 5000);
+        }, 1500);
 
-        // Phase 2: Amount reveal
+        // Phase 2: Amount reveal (3s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 6500);
+        }, 3000);
 
         return () => {
             audioManager.stop('medium_alert');
@@ -79,7 +79,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[3vh]">
+                    <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div

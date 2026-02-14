@@ -41,14 +41,14 @@ export default function CinematicTier({ donorName, amount, message, duration, on
         audioManager.preload('cinematic_alert', alertSound);
         audioManager.play('cinematic_alert', { volume: (volume / 100) });
 
-        // Phase 1: High-Duration Buildup (10s)
-        const nameTimer = setTimeout(() => setShowName(true), 10000);
+        // Phase 1: High-Duration Buildup (5s)
+        const nameTimer = setTimeout(() => setShowName(true), 5000);
 
-        // Phase 2: Amount reveal
+        // Phase 2: Amount reveal (8s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 11500);
+        }, 8000);
 
         return () => {
             audioManager.stop('cinematic_alert');
@@ -73,7 +73,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
             />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[12vh] w-full text-center px-4">
+                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
                     <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (

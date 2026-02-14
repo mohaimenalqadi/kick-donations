@@ -19,12 +19,23 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
     const count = useSpring(0, { stiffness: 100, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
+    const [showName, setShowName] = useState(false);
+    const [showAmount, setShowAmount] = useState(false);
+
     useEffect(() => {
-        // Trigger counter immediate or after small delay
-        const timer = setTimeout(() => {
+        // Phase 1: Name reveal (1.5s)
+        const nameTimer = setTimeout(() => setShowName(true), 1500);
+
+        // Phase 2: Amount reveal (3s)
+        const amountTimer = setTimeout(() => {
+            setShowAmount(true);
             count.set(amount);
-        }, 500);
-        return () => clearTimeout(timer);
+        }, 3000);
+
+        return () => {
+            clearTimeout(nameTimer);
+            clearTimeout(amountTimer);
+        };
     }, [amount, count]);
 
     return (
@@ -38,53 +49,60 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
             </div>
 
             {/* Content Area */}
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8 }}
-                className="z-10 flex flex-col items-center text-center max-w-5xl px-10 pointer-events-none"
-            >
-                {/* Donor Name */}
-                <motion.div
-                    initial={{ scale: 0.5, y: -50, opacity: 0 }}
-                    animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="text-[clamp(3rem,8vw,8rem)] font-black text-white mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw] leading-tight uppercase"
-                >
-                    {donor}
-                </motion.div>
+            <div className="z-10 flex flex-col items-center gap-[6vh] w-full text-center px-4 pointer-events-none">
+                <div className="flex flex-col items-center gap-[4vh]">
+                    {/* Donor Name */}
+                    <AnimatePresence mode="wait">
+                        {showName && (
+                            <motion.div
+                                initial={{ scale: 0.5, y: -50, opacity: 0 }}
+                                animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                className="text-[clamp(3rem,8vw,8rem)] font-black text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw] leading-tight uppercase"
+                            >
+                                {donor}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                {/* Amount - MEGA Styled */}
-                <motion.div
-                    initial={{ scale: 0.3, opacity: 0 }}
-                    animate={{ scale: [0.3, 1.3, 1], opacity: 1 }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 150,
-                        damping: 15,
-                        delay: 0.4
-                    }}
-                    className="text-[clamp(6rem,14vw,14rem)] font-black leading-none mb-6 p-4"
-                    style={{
-                        color: '#ff007f',
-                        textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
-                    }}
-                >
-                    <motion.span>{rounded}</motion.span> <span className="text-[clamp(2rem,4vw,5rem)] align-middle ml-4">د.ل</span>
-                </motion.div>
+                    {/* Amount - MEGA Styled */}
+                    <AnimatePresence mode="wait">
+                        {showAmount && (
+                            <motion.div
+                                initial={{ scale: 0.3, opacity: 0 }}
+                                animate={{ scale: [0.3, 1.3, 1], opacity: 1 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 150,
+                                    damping: 15,
+                                    delay: 0
+                                }}
+                                className="text-[clamp(6rem,14vw,14rem)] font-black leading-none p-4"
+                                style={{
+                                    color: '#ff007f',
+                                    textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
+                                }}
+                            >
+                                <motion.span>{rounded}</motion.span> <span className="text-[clamp(2rem,4vw,5rem)] align-middle ml-4">د.ل</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 {/* Message */}
-                {message && message.trim() && (
-                    <motion.div
-                        initial={{ scale: 0.5, y: 30, opacity: 0 }}
-                        animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
-                        className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
-                    >
-                        "{message}"
-                    </motion.div>
-                )}
-            </motion.div>
+                <AnimatePresence mode="wait">
+                    {showAmount && message && message.trim() && (
+                        <motion.div
+                            initial={{ scale: 0.5, y: 30, opacity: 0 }}
+                            animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+                            className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
+                        >
+                            "{message}"
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
 
             {/* Bottom Glow */}
             <div

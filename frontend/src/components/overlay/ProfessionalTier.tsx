@@ -43,17 +43,17 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
         audioManager.preload('prof_alert', alertSound);
         audioManager.play('prof_alert', { volume: (volume / 100) });
 
-        // Phase 1: Mystery Entry Buildup (7s)
+        // Phase 1: Mystery Entry Buildup (3s)
         const nameTimer = setTimeout(() => {
             setShowName(true);
             setShowBorder(true);
-        }, 7000);
+        }, 3000);
 
-        // Phase 2: Amount reveal
+        // Phase 2: Amount reveal (5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 8500);
+        }, 5000);
 
         return () => {
             audioManager.stop('prof_alert');
@@ -78,8 +78,8 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
             />
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[10vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[3vh]">
+                <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
+                    <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div

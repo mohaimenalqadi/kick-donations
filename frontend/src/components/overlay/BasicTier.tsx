@@ -43,17 +43,17 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
         audioManager.preload('basic_alert', alertSound);
         audioManager.play('basic_alert', { volume: (volume / 100) });
 
-        // Phase 1: Entry Buildup (3s for Basic)
+        // Phase 1: Entry Buildup (1s for Basic)
         const nameTimer = setTimeout(() => {
             setShowName(true);
             setShowBorder(true);
-        }, 3000);
+        }, 1000);
 
-        // Phase 2: Amount reveal
+        // Phase 2: Amount reveal (2s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 4500);
+        }, 2000);
 
         return () => {
             audioManager.stop('basic_alert');
@@ -79,7 +79,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
 
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center px-4">
-                    <div className="flex flex-col items-center gap-[3vh]">
+                    <div className="flex flex-col items-center gap-[4vh]">
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
