@@ -70,7 +70,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
             className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center z-50 px-4"
         >
             {/* --- MEDIA CONTAINER (Frameless) --- */}
-            <div className="relative w-[30vw] max-w-[500px] aspect-video mb-4">
+            <div className="relative w-[clamp(450px,60vw,900px)] aspect-video mb-4">
                 <TierBackground
                     url={backgroundUrl}
                     fallbackUrl={BACKGROUND_ASSETS.BASIC}
