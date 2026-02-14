@@ -68,7 +68,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.6 }}
-                        className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
+                        className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
                     >
                         "{message}"
                     </motion.div>

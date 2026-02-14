@@ -124,7 +124,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 transition={{ delay: 1, duration: 1 }}
                                 className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>

@@ -125,7 +125,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                 transition={{ delay: 0.5, duration: 0.8 }}
                                 className="max-w-5xl"
                             >
-                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>

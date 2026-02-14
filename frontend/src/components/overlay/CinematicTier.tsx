@@ -120,7 +120,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 transition={{ delay: 0.7, duration: 1 }}
                                 className="max-w-6xl"
                             >
-                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
+                                <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
                                     "{message}"
                                 </p>
                             </motion.div>
