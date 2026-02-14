@@ -27,28 +27,28 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ topDonor }) => {
                     className="relative group"
                 >
                     {/* High-end Solid Glass Card */}
-                    <div className="bg-[#0f0f12]/95 backdrop-blur-2xl border border-white/20 rounded-[28px] p-1.5 pr-6 flex items-center gap-4 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative min-w-0 max-w-[90vw]">
+                    <div className="bg-[#0f0f12]/95 backdrop-blur-2xl border border-white/20 rounded-[24px] p-1 pr-5 flex items-center gap-3 overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.8)] relative min-w-0 max-w-[90vw]">
 
                         {/* Animated Glow Border */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#fbbf24]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
                         {/* Icon Container */}
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-[#fbbf24]/20 shrink-0">
-                            <Trophy size={24} className="text-black" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-[#fbbf24]/20 shrink-0">
+                            <Trophy size={20} className="text-black" />
                         </div>
 
                         {/* Text Content */}
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] leading-none mb-1">
+                            <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] leading-none mb-1">
                                 أفضل دعم
                             </span>
-                            <div className="flex items-center gap-3">
-                                <span className="text-lg font-black text-white whitespace-nowrap truncate s-full">
+                            <div className="flex items-center gap-2">
+                                <span className="text-base font-black text-white whitespace-nowrap truncate s-full">
                                     {topDonor.donor_name}
                                 </span>
-                                <div className="h-4 w-[1px] bg-white/10 shrink-0" />
-                                <span className="text-lg font-black text-[#fbbf24] shrink-0">
-                                    {topDonor.amount} <small className="text-[10px] opacity-70">د.ل</small>
+                                <div className="h-3.5 w-[1px] bg-white/10 shrink-0" />
+                                <span className="text-base font-black text-[#fbbf24] shrink-0">
+                                    {topDonor.amount} <small className="text-[9px] opacity-70">د.ل</small>
                                 </span>
                             </div>
                         </div>
