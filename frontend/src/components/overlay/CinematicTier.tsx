@@ -41,14 +41,14 @@ export default function CinematicTier({ donorName, amount, message, duration, on
         audioManager.preload('cinematic_alert', alertSound);
         audioManager.play('cinematic_alert', { volume: (volume / 100) });
 
-        // Phase 1: High-Duration Buildup (8s)
-        const nameTimer = setTimeout(() => setShowName(true), 8000);
+        // Phase 1: High-Duration Buildup (2s - Fast)
+        const nameTimer = setTimeout(() => setShowName(true), 2000);
 
-        // Phase 2: Amount reveal (12s)
+        // Phase 2: Amount reveal (2.5s)
         const amountTimer = setTimeout(() => {
             setShowAmount(true);
             count.set(amount);
-        }, 12000);
+        }, 2500);
 
         return () => {
             audioManager.stop('cinematic_alert');
@@ -105,7 +105,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 <span className="text-[clamp(5rem,13vw,13rem)] font-black leading-none"
                                     style={{
                                         color: '#ff007f', // Unified Color (Pink/Magenta)
-                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
+                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #4d0026'
                                     }}
                                 >
                                     <motion.span>{rounded}</motion.span>
@@ -113,7 +113,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                 <span className="text-[clamp(2.5rem,6vw,6rem)] font-black ml-4 align-middle"
                                     style={{
                                         color: '#ff007f', // Unified Label Color
-                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #be185d'
+                                        textShadow: '0 0 55px rgba(255,0,127,0.6), 0 12px 0 #4d0026'
                                     }}
                                 >
                                     د.ل
