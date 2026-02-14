@@ -46,6 +46,13 @@ const TIERS = {
         duration: 90000,      // 90 seconds
         label: 'أسطوري',
         color: '#e879f9'
+    },
+    tier_50: {
+        min: 50,
+        max: 50,
+        duration: 120000,     // 120 seconds
+        label: 'الخمسين الخارقة',
+        color: '#ff007f'
     }
 };
 
@@ -57,6 +64,9 @@ const TIERS = {
 function calculateTier(amount) {
     const numAmount = parseFloat(amount);
 
+    if (numAmount === 50) {
+        return { name: 'tier_50', ...TIERS.tier_50 };
+    }
     if (numAmount >= TIERS.tier6.min) {
         return { name: 'tier6', ...TIERS.tier6 };
     }

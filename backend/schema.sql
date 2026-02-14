@@ -13,6 +13,14 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Transfer sessions table (Credit system)
+CREATE TABLE IF NOT EXISTS transfer_sessions (
+    id SERIAL PRIMARY KEY,
+    donor_phone VARCHAR(20) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Donations table
 CREATE TABLE IF NOT EXISTS donations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

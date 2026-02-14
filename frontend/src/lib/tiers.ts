@@ -28,6 +28,11 @@ export const TIERS = {
         duration: 90000,
         label: 'أسطوري',
         color: '#e879f9'
+    },
+    tier_50: {
+        duration: 120000,
+        label: 'الخمسين الخارقة',
+        color: '#ff007f'
     }
 } as const;
 
@@ -36,6 +41,7 @@ export type TierName = keyof typeof TIERS;
 export function calculateTier(amount: number): { name: TierName; duration: number; color: string; label: string } {
     const numAmount = Number(amount);
 
+    if (numAmount === 50) return { name: 'tier_50', ...TIERS.tier_50 };
     if (numAmount >= 40) return { name: 'tier6', ...TIERS.tier6 };
     if (numAmount >= 30) return { name: 'tier5', ...TIERS.tier5 };
     if (numAmount >= 20) return { name: 'tier4', ...TIERS.tier4 };

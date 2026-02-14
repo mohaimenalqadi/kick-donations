@@ -19,6 +19,7 @@ import ProfessionalTier from '@/components/overlay/ProfessionalTier';
 import CinematicTier from '@/components/overlay/CinematicTier';
 import GoldTier from '@/components/overlay/GoldTier';
 import DiamondTier from '@/components/overlay/DiamondTier';
+import FiftyTier from '@/components/overlay/FiftyTier';
 import Leaderboard from '@/components/overlay/Leaderboard';
 import StandbyScreen from '@/components/overlay/StandbyScreen';
 import { api, type Donation } from '@/lib/api';
@@ -335,6 +336,18 @@ export default function OverlayPage() {
                 return <GoldTier key={uniqueKey} {...props} />;
             case 'tier6':
                 return <DiamondTier key={uniqueKey} {...props} />;
+            case 'tier_50':
+                return (
+                    <FiftyTier
+                        key={uniqueKey}
+                        donor={props.donorName}
+                        amount={props.amount}
+                        message={props.message}
+                        color={donationToDisplay.color}
+                        backgroundUrl={props.backgroundUrl}
+                        duration={props.duration}
+                    />
+                );
             default:
                 return <BasicTier key={uniqueKey} {...props} />;
         }

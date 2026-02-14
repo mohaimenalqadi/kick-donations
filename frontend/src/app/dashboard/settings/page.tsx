@@ -60,9 +60,13 @@ export default function SettingsPage() {
                 console.log('✅ Fetched Tiers:', tiersRes);
 
                 if (tiersRes.tiers) {
-                    setTiers(tiersRes.tiers);
-                    setLocalTiers(tiersRes.tiers);
-                    console.log('📊 Tiers state updated:', tiersRes.tiers.length, 'items');
+                    const sorted = tiersRes.tiers.sort((a: any, b: any) => {
+                        const order = ['tier1', 'tier2', 'tier3', 'tier4', 'tier5', 'tier6', 'tier_50'];
+                        return order.indexOf(a.tier_key) - order.indexOf(b.tier_key);
+                    });
+                    setTiers(sorted);
+                    setLocalTiers(JSON.parse(JSON.stringify(sorted)));
+                    console.log('📊 Tiers state updated:', sorted.length, 'items');
                 }
             } catch (error: any) {
                 console.error('❌ Failed to fetch settings:', error);
