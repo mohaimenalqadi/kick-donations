@@ -26,7 +26,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
     const [showAmount, setShowAmount] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
 
-    const count = useSpring(0, { stiffness: 30, damping: 25 });
+    const count = useSpring(0, { stiffness: 100, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -83,9 +83,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ duration: 0.6 }}
+                                    initial={{ scale: 0.5, y: 20, opacity: 0 }}
+                                    animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-2"
                                 >
                                     <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
@@ -98,9 +98,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
-                                    animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 150, damping: 20 }}
+                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(10px)' }}
+                                    animate={{ scale: [0.5, 1.2, 1], opacity: 1, filter: 'blur(0px)' }}
+                                    transition={{ type: "spring", stiffness: 120, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
                                     <span className="text-[clamp(4rem,10vw,10rem)] font-black leading-none"
@@ -120,9 +120,9 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.3 }}
+                                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
                                 className="max-w-4xl"
                             >
                                 <p className="text-[clamp(1.5rem,3.5vw,3.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">

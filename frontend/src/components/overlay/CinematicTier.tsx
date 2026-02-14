@@ -24,7 +24,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
 
-    const count = useSpring(0, { stiffness: 25, damping: 25 });
+    const count = useSpring(0, { stiffness: 110, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -78,8 +78,8 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 80, opacity: 0, scale: 1.2, filter: 'blur(20px)' }}
-                                    animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                    initial={{ scale: 0.3, y: 80, opacity: 0, filter: 'blur(20px)' }}
+                                    animate={{ scale: [0.3, 1.25, 1], y: 0, opacity: 1, filter: 'blur(0px)' }}
                                     transition={{ duration: 1.2, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-2"
                                 >
@@ -93,9 +93,9 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(20px)' }}
-                                    animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                                    initial={{ scale: 0.3, opacity: 0, filter: 'blur(20px)' }}
+                                    animate={{ scale: [0.3, 1.35, 1], opacity: 1, filter: 'blur(0px)' }}
+                                    transition={{ type: "spring", stiffness: 150, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
                                     <span className="text-[clamp(7rem,16vw,16rem)] font-black leading-none"
@@ -115,9 +115,9 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, y: 50 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.7, duration: 1 }}
+                                initial={{ opacity: 0, scale: 0.4, y: 50 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.4 }}
                                 className="max-w-6xl"
                             >
                                 <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">

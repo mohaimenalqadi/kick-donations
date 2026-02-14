@@ -1,7 +1,7 @@
 
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { BACKGROUND_ASSETS } from '@/lib/audio';
 import TierBackground from './TierBackground';
@@ -16,6 +16,17 @@ interface FiftyTierProps {
 }
 
 export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000 }: FiftyTierProps) {
+    const count = useSpring(0, { stiffness: 100, damping: 20 });
+    const rounded = useTransform(count, latest => Math.round(latest));
+
+    useEffect(() => {
+        // Trigger counter immediate or after small delay
+        const timer = setTimeout(() => {
+            count.set(amount);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [amount, count]);
+
     return (
         <div className="fixed inset-0 w-screen h-screen flex items-center justify-center overflow-hidden">
             {/* Background Video */}
@@ -35,9 +46,9 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
             >
                 {/* Donor Name */}
                 <motion.div
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
+                    initial={{ scale: 0.5, y: -50, opacity: 0 }}
+                    animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-[clamp(3rem,8vw,8rem)] font-black text-white mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw] leading-tight uppercase"
                 >
                     {donor}
@@ -45,11 +56,11 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
 
                 {/* Amount - MEGA Styled */}
                 <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
+                    initial={{ scale: 0.3, opacity: 0 }}
+                    animate={{ scale: [0.3, 1.3, 1], opacity: 1 }}
                     transition={{
                         type: "spring",
-                        stiffness: 200,
+                        stiffness: 150,
                         damping: 15,
                         delay: 0.4
                     }}
@@ -59,15 +70,15 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                         textShadow: '0 0 40px rgba(255,0,127,0.6), 0 10px 0 #4d0026'
                     }}
                 >
-                    {amount} <span className="text-[clamp(2rem,4vw,5rem)] align-middle ml-4">د.ل</span>
+                    <motion.span>{rounded}</motion.span> <span className="text-[clamp(2rem,4vw,5rem)] align-middle ml-4">د.ل</span>
                 </motion.div>
 
                 {/* Message */}
                 {message && message.trim() && (
                     <motion.div
-                        initial={{ y: 30, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.6 }}
+                        initial={{ scale: 0.5, y: 30, opacity: 0 }}
+                        animate={{ scale: [0.5, 1.1, 1], y: 0, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
                         className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
                     >
                         "{message}"

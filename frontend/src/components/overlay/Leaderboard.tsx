@@ -26,8 +26,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ topDonor }) => {
                     }}
                     className="relative group"
                 >
-                    {/* High-end Glassmorphism Card */}
-                    <div className="bg-[#0f0f12]/60 backdrop-blur-xl border border-white/10 rounded-[28px] p-1 pr-6 flex items-center gap-4 overflow-hidden shadow-2xl shadow-black/50">
+                    {/* High-end Solid Glass Card */}
+                    <div className="bg-[#0f0f12]/95 backdrop-blur-2xl border border-white/20 rounded-[28px] p-1 pr-6 flex items-center gap-4 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative">
 
                         {/* Animated Glow Border */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#fbbf24]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

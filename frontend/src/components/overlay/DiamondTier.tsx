@@ -37,7 +37,7 @@ export default function DiamondTier({
     const [showAmount, setShowAmount] = useState(false);
     const [showGlow, setShowGlow] = useState(false);
 
-    const count = useSpring(0, { stiffness: 12, damping: 28 });
+    const count = useSpring(0, { stiffness: 120, damping: 22 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     // Master Duration Timer
@@ -115,28 +115,13 @@ export default function DiamondTier({
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
                 <div className="flex flex-col items-center gap-[6vh] w-full text-center">
                     <div className="flex flex-col items-center gap-[3vh] relative">
-                        {/* Diamond badge */}
-                        <AnimatePresence>
-                            {showName && (
-                                <motion.div
-                                    initial={{ scale: 0, rotate: -180 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    transition={{ type: "spring", stiffness: 80, damping: 15 }}
-                                    className="mb-4"
-                                >
-                                    <div className="w-24 h-24 flex items-center justify-center">
-                                        <span className="text-7xl drop-shadow-[0_0_30px_rgba(232,121,249,0.8)]">💎</span>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
 
                         {/* Donor Name */}
                         <AnimatePresence mode="wait">
                             {showName && (
                                 <motion.div
-                                    initial={{ y: 50, opacity: 0, scale: 0.8, filter: 'blur(25px)' }}
-                                    animate={{ y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                    initial={{ scale: 0.3, y: 50, opacity: 0, filter: 'blur(25px)' }}
+                                    animate={{ scale: [0.3, 1.25, 1], y: 0, opacity: 1, filter: 'blur(0px)' }}
                                     transition={{ duration: 1, ease: "easeOut" }}
                                     className="relative z-10"
                                 >
@@ -151,9 +136,9 @@ export default function DiamondTier({
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(25px)' }}
-                                    animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 80, damping: 12 }}
+                                    initial={{ scale: 0.2, opacity: 0, filter: 'blur(25px)' }}
+                                    animate={{ scale: [0.2, 1.4, 1], opacity: 1, filter: 'blur(0px)' }}
+                                    transition={{ type: "spring", stiffness: 160, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
                                     <span className="text-[clamp(7rem,15vw,15rem)] font-black leading-none"
@@ -174,9 +159,9 @@ export default function DiamondTier({
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                                initial={{ opacity: 0, scale: 0.4, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                transition={{ delay: 0.6, duration: 0.8 }}
+                                transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.4 }}
                                 className="max-w-6xl"
                             >
                                 <p className="text-[clamp(2.2rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words max-w-[90vw]">
