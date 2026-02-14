@@ -127,7 +127,7 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                                     transition={{ duration: 1, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-4 relative z-10"
                                 >
-                                    <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-white to-fuchsia-300 tracking-tighter uppercase leading-[1.1] drop-shadow-[0_2px_40px_rgba(232,121,249,0.5)] break-words max-w-[90vw]"
+                                    <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-white to-fuchsia-300 tracking-tighter uppercase leading-[1.1] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw]"
                                         style={{ WebkitTextStroke: '1px rgba(232,121,249,0.3)' }}
                                     >
                                         {donorName}
@@ -139,15 +139,20 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(30px)' }}
+                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(25px)' }}
                                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 80, damping: 18 }}
-                                    className="flex flex-col items-center relative z-10"
+                                    transition={{ type: "spring", stiffness: 80, damping: 12 }}
+                                    className="flex flex-col items-center"
                                 >
-                                    <motion.span className="text-[clamp(8rem,22vw,22rem)] font-black text-fuchsia-300 leading-none drop-shadow-[0_0_80px_rgba(232,121,249,0.7)]">
+                                    <span className="text-[clamp(8rem,18vw,18rem)] font-black leading-none"
+                                        style={{
+                                            color: '#ff007f',
+                                            textShadow: '0 0 60px rgba(255,0,127,0.8), 0 15px 0 #4d0026'
+                                        }}
+                                    >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2.5rem,6vw,6rem)] text-fuchsia-300/90 font-black ml-10 drop-shadow-[0_0_60px_rgba(232,121,249,0.5)]">د.ل</span>
-                                    </motion.span>
+                                        <span className="text-[clamp(2.5rem,5vw,6rem)] opacity-90 font-black ml-8">د.ل</span>
+                                    </span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -156,13 +161,13 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 30, filter: 'blur(10px)' }}
-                                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ delay: 0.6, duration: 0.8 }}
                                 className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_80px_rgba(232,121,249,0.8)] leading-tight break-words max-w-[85vw]">
-                                    {message}
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                    "{message}"
                                 </p>
                             </motion.div>
                         )}

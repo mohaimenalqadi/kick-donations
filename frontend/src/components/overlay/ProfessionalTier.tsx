@@ -88,7 +88,7 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                     transition={{ duration: 1 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-widest leading-tight drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
+                                    <h2 className="text-[clamp(3.5rem,8.5vw,8.5rem)] font-black text-white tracking-widest leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -103,9 +103,14 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                     transition={{ type: "spring", stiffness: 100, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(6rem,14vw,14rem)] font-black text-[#ff007f] drop-shadow-[0_0_50px_rgba(255,0,127,0.6)] leading-none">
+                                    <span className="text-[clamp(6rem,14vw,14rem)] font-black leading-none"
+                                        style={{
+                                            color: '#ff007f',
+                                            textShadow: '0 0 50px rgba(255,0,127,0.6), 0 12px 0 #4d0026'
+                                        }}
+                                    >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.8rem,4vw,4.5rem)] text-[#ff007f]/90 font-black ml-6">د.ل</span>
+                                        <span className="text-[clamp(1.8rem,4vw,4.5rem)] opacity-90 font-black ml-6">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -120,8 +125,8 @@ export default function ProfessionalTier({ donorName, amount, message, duration,
                                 transition={{ delay: 0.5, duration: 0.8 }}
                                 className="max-w-5xl"
                             >
-                                <p className="text-[clamp(2rem,4vw,4.5rem)] text-white font-black drop-shadow-[0_4px_40px_rgba(0,0,0,1)] leading-tight break-words max-w-[85vw]">
-                                    {message}
+                                <p className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                    "{message}"
                                 </p>
                             </motion.div>
                         )}

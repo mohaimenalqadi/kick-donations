@@ -83,7 +83,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                                     transition={{ duration: 1.2, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3.5rem,9vw,9rem)] font-black text-white tracking-tighter leading-[1.1] drop-shadow-[0_2px_40px_rgba(0,0,0,0.9)] uppercase break-words max-w-[90vw]">
+                                    <h2 className="text-[clamp(3.5rem,9vw,9rem)] font-black text-white tracking-tighter leading-[1.1] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -93,14 +93,19 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                         <AnimatePresence mode="wait">
                             {showAmount && (
                                 <motion.div
-                                    initial={{ scale: 2, opacity: 0, filter: 'blur(30px)' }}
+                                    initial={{ scale: 0.5, opacity: 0, filter: 'blur(20px)' }}
                                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-                                    transition={{ type: "spring", stiffness: 80, damping: 15 }}
+                                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(7rem,16vw,16rem)] font-black text-[#ff007f] drop-shadow-[0_0_60px_rgba(255,0,127,0.7)] leading-none text-glow-subtle">
+                                    <span className="text-[clamp(7rem,16vw,16rem)] font-black leading-none"
+                                        style={{
+                                            color: '#ff007f',
+                                            textShadow: '0 0 50px rgba(255,0,127,0.7), 0 15px 0 #4d0026'
+                                        }}
+                                    >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(2rem,5vw,5rem)] text-[#ff007f]/90 font-black ml-8">د.ل</span>
+                                        <span className="text-[clamp(2rem,4.5vw,5rem)] opacity-90 font-black ml-8">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -110,13 +115,13 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                     <AnimatePresence mode="wait">
                         {showAmount && message && message.trim() && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8, y: 100 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.7, duration: 1 }}
                                 className="max-w-6xl"
                             >
-                                <p className="text-[clamp(2rem,4vw,4.5rem)] text-white font-black drop-shadow-[0_4px_50px_rgba(0,0,0,1)] leading-tight break-words max-w-[85vw]">
-                                    {message}
+                                <p className="text-[clamp(2rem,4vw,4.5rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                    "{message}"
                                 </p>
                             </motion.div>
                         )}

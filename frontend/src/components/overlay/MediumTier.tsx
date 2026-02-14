@@ -88,7 +88,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ duration: 0.8 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3rem,7vw,7rem)] font-black text-white tracking-tighter leading-tight drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
+                                    <h2 className="text-[clamp(3rem,8vw,8rem)] font-black text-white tracking-tighter leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -103,9 +103,14 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                                     className="flex flex-col items-center"
                                 >
-                                    <span className="text-[clamp(5rem,12vw,12rem)] font-black text-[#ff007f] drop-shadow-[0_0_40px_rgba(255,0,127,0.5)] leading-none">
+                                    <span className="text-[clamp(5rem,12vw,12rem)] font-black leading-none"
+                                        style={{
+                                            color: '#ff007f',
+                                            textShadow: '0 0 40px rgba(255,0,127,0.5), 0 10px 0 #4d0026'
+                                        }}
+                                    >
                                         <motion.span>{rounded}</motion.span>
-                                        <span className="text-[clamp(1.5rem,3.5vw,4rem)] text-[#ff007f]/80 font-black ml-4">د.ل</span>
+                                        <span className="text-[clamp(1.5rem,3.5vw,4rem)] opacity-90 font-black ml-4">د.ل</span>
                                     </span>
                                 </motion.div>
                             )}
@@ -120,8 +125,8 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 transition={{ delay: 0.4 }}
                                 className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.8rem,3.5vw,4rem)] text-white font-black drop-shadow-[0_4px_30px_rgba(0,0,0,1)] leading-tight break-words max-w-[85vw]">
-                                    {message}
+                                <p className="text-[clamp(1.8rem,4vw,4rem)] font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]">
+                                    "{message}"
                                 </p>
                             </motion.div>
                         )}
