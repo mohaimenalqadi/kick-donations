@@ -94,7 +94,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                             initial={{ x: -100, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="text-5xl font-black text-white mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]"
+                            className="text-5xl font-black text-white mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] break-words max-w-[90vw] leading-tight"
                         >
                             {donor}
                         </motion.div>
@@ -124,7 +124,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                                 initial={{ y: 50, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.6 }}
-                                className="text-4xl font-bold text-white/90 leading-relaxed italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+                                className="text-4xl font-bold text-white/90 leading-tight italic drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words max-w-[85vw]"
                             >
                                 "{message}"
                             </motion.div>

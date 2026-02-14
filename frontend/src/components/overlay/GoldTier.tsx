@@ -87,7 +87,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                     transition={{ duration: 1.5, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-4"
                                 >
-                                    <h2 className="text-[clamp(4.5rem,11vw,11rem)] font-black text-white tracking-[0.2em] leading-none drop-shadow-[0_5px_50px_rgba(0,0,0,0.9)] uppercase">
+                                    <h2 className="text-[clamp(3rem,9.5vw,9.5rem)] font-black text-white tracking-[0.1em] leading-[1.1] drop-shadow-[0_5px_50px_rgba(0,0,0,0.9)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -119,7 +119,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 transition={{ delay: 1, duration: 1 }}
                                 className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_60px_rgba(0,0,0,1)] leading-relaxed">
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_60px_rgba(0,0,0,1)] leading-tight break-words max-w-[85vw]">
                                     {message}
                                 </p>
                             </motion.div>

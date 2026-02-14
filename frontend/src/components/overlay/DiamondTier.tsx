@@ -100,8 +100,8 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                 )}
             </AnimatePresence>
 
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-[5vh] w-full text-center px-8">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
+                <div className="flex flex-col items-center gap-[4vh] w-full text-center">
                     <div className="flex flex-col items-center gap-[2vh] relative">
                         {/* Diamond badge */}
                         <AnimatePresence>
@@ -127,7 +127,7 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                                     transition={{ duration: 1, ease: "easeOut" }}
                                     className="flex flex-col items-center gap-4 relative z-10"
                                 >
-                                    <h1 className="text-[clamp(5rem,12vw,12rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-white to-fuchsia-300 tracking-tighter uppercase leading-none drop-shadow-[0_2px_40px_rgba(232,121,249,0.5)]"
+                                    <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-white to-fuchsia-300 tracking-tighter uppercase leading-[1.1] drop-shadow-[0_2px_40px_rgba(232,121,249,0.5)] break-words max-w-[90vw]"
                                         style={{ WebkitTextStroke: '1px rgba(232,121,249,0.3)' }}
                                     >
                                         {donorName}
@@ -161,7 +161,7 @@ export default function DiamondTier({ donorName, amount, message, duration, onCo
                                 transition={{ delay: 0.6, duration: 0.8 }}
                                 className="max-w-7xl"
                             >
-                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_80px_rgba(232,121,249,0.8)] leading-relaxed">
+                                <p className="text-[clamp(2.5rem,5vw,6rem)] text-white font-black drop-shadow-[0_5px_80px_rgba(232,121,249,0.8)] leading-tight break-words max-w-[85vw]">
                                     {message}
                                 </p>
                             </motion.div>

@@ -88,7 +88,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                     transition={{ duration: 0.6 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-black text-white tracking-tight leading-none drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase">
+                                    <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-black text-white tracking-tight leading-tight drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -120,7 +120,7 @@ export default function BasicTier({ donorName, amount, message, duration, onComp
                                 transition={{ delay: 0.3 }}
                                 className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.5rem,3vw,3.5rem)] text-white font-black drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-relaxed">
+                                <p className="text-[clamp(1.5rem,3vw,3.5rem)] text-white font-black drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-tight break-words max-w-[85vw]">
                                     {message}
                                 </p>
                             </motion.div>

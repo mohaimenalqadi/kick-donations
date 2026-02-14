@@ -88,7 +88,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                     transition={{ duration: 0.8 }}
                                     className="flex flex-col items-center gap-2"
                                 >
-                                    <h2 className="text-[clamp(3rem,7vw,7rem)] font-black text-white tracking-tighter leading-none drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase">
+                                    <h2 className="text-[clamp(3rem,7vw,7rem)] font-black text-white tracking-tighter leading-tight drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase break-words max-w-[90vw]">
                                         {donorName}
                                     </h2>
                                 </motion.div>
@@ -120,7 +120,7 @@ export default function MediumTier({ donorName, amount, message, duration, onCom
                                 transition={{ delay: 0.4 }}
                                 className="max-w-4xl"
                             >
-                                <p className="text-[clamp(1.8rem,3.5vw,4rem)] text-white font-black drop-shadow-[0_4px_30px_rgba(0,0,0,1)] leading-relaxed">
+                                <p className="text-[clamp(1.8rem,3.5vw,4rem)] text-white font-black drop-shadow-[0_4px_30px_rgba(0,0,0,1)] leading-tight break-words max-w-[85vw]">
                                     {message}
                                 </p>
                             </motion.div>
