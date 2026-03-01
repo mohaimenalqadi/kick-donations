@@ -1,89 +1,63 @@
 import type { Config } from 'tailwindcss';
 
+/**
+ * Design tokens. Colours are defined once here and used through utility
+ * classes (bg-surface, text-brand, ...) instead of hard-coded hex values.
+ */
 const config: Config = {
-    content: [
-        './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    ],
+    content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     theme: {
         extend: {
             colors: {
-                // Kick-inspired color palette
-                primary: {
-                    50: '#f0fdf4',
-                    100: '#dcfce7',
-                    200: '#bbf7d0',
-                    300: '#86efac',
-                    400: '#4ade80',
-                    500: '#53fc18', // Kick green
-                    600: '#16a34a',
-                    700: '#15803d',
-                    800: '#166534',
-                    900: '#14532d',
+                brand: {
+                    DEFAULT: '#03e115', // Kick green — also the OBS chroma-key colour
+                    soft: 'rgb(3 225 21 / 0.12)',
+                    ring: 'rgb(3 225 21 / 0.35)',
+                    ink: '#04130a',      // text on brand-coloured surfaces
                 },
-                dark: {
-                    100: '#1e1e2e',
-                    200: '#181825',
-                    300: '#11111b',
-                    400: '#0a0a0f',
+                canvas: '#0a0a0b',
+                surface: {
+                    DEFAULT: '#111114',
+                    raised: '#17171b',
+                    sunken: '#0c0c0e',
                 },
-                // Donation tiers
-                tier: {
-                    basic: '#4CAF50',
-                    medium: '#2196F3',
-                    professional: '#9C27B0',
-                    cinematic: '#FF9800',
+                line: {
+                    DEFAULT: 'rgb(255 255 255 / 0.07)',
+                    strong: 'rgb(255 255 255 / 0.14)',
                 },
+                ink: {
+                    DEFAULT: '#f4f4f5',
+                    muted: '#a1a1aa',
+                    faint: '#71717a',
+                },
+                danger: { DEFAULT: '#f87171', soft: 'rgb(248 113 113 / 0.12)' },
+                warning: { DEFAULT: '#fbbf24', soft: 'rgb(251 191 36 / 0.12)' },
+                info: { DEFAULT: '#60a5fa', soft: 'rgb(96 165 250 / 0.12)' },
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
-                arabic: ['Cairo', 'sans-serif'],
+                sans: ['var(--font-cairo)', 'system-ui', 'sans-serif'],
             },
-            animation: {
-                'fade-in': 'fadeIn 0.5s ease-out',
-                'slide-up': 'slideUp 0.5s ease-out',
-                'slide-down': 'slideDown 0.5s ease-out',
-                'scale-in': 'scaleIn 0.5s ease-out',
-                'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-                'shake': 'shake 0.5s ease-in-out',
-                'cinematic-enter': 'cinematicEnter 1s ease-out',
-            },
-            keyframes: {
-                fadeIn: {
-                    '0%': { opacity: '0' },
-                    '100%': { opacity: '1' },
-                },
-                slideUp: {
-                    '0%': { opacity: '0', transform: 'translateY(20px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
-                },
-                slideDown: {
-                    '0%': { opacity: '0', transform: 'translateY(-20px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
-                },
-                scaleIn: {
-                    '0%': { opacity: '0', transform: 'scale(0.8)' },
-                    '100%': { opacity: '1', transform: 'scale(1)' },
-                },
-                glowPulse: {
-                    '0%, 100%': { boxShadow: '0 0 20px rgba(83, 252, 24, 0.3)' },
-                    '50%': { boxShadow: '0 0 40px rgba(83, 252, 24, 0.6)' },
-                },
-                shake: {
-                    '0%, 100%': { transform: 'translateX(0)' },
-                    '25%': { transform: 'translateX(-5px)' },
-                    '75%': { transform: 'translateX(5px)' },
-                },
-                cinematicEnter: {
-                    '0%': { opacity: '0', transform: 'scale(1.5)' },
-                    '50%': { opacity: '1', transform: 'scale(1.1)' },
-                    '100%': { opacity: '1', transform: 'scale(1)' },
-                },
+            borderRadius: {
+                xl: '0.875rem',
+                '2xl': '1.25rem',
+                '3xl': '1.75rem',
             },
             boxShadow: {
-                'neon': '0 0 10px rgba(83, 252, 24, 0.5), 0 0 20px rgba(83, 252, 24, 0.3)',
-                'neon-strong': '0 0 20px rgba(83, 252, 24, 0.7), 0 0 40px rgba(83, 252, 24, 0.5)',
+                glow: '0 0 0 1px rgb(3 225 21 / 0.25), 0 8px 30px -8px rgb(3 225 21 / 0.35)',
+                card: '0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8)',
+            },
+            keyframes: {
+                'fade-up': {
+                    '0%': { opacity: '0', transform: 'translateY(8px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                shimmer: {
+                    '100%': { transform: 'translateX(-100%)' },
+                },
+            },
+            animation: {
+                'fade-up': 'fade-up 0.35s ease-out both',
+                shimmer: 'shimmer 1.4s infinite',
             },
         },
     },

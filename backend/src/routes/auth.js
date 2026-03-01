@@ -1,283 +1,117 @@
-const bcrypt = require('bcryptjs');
-const { supabase } = require('../config/database');
+'use strict';
 
-/**
- * Authentication Routes
- */
-async function authRoutes(fastify, options) {
+const { createLockout } = require('../lib/lockout');
+const { tooMany, unauthorized, badRequest } = require('../lib/errors');
+const { normalizeUsername, publicUser } = require('../services/users');
+const S = require('./schemas');
 
-    /**
-     * POST /api/auth/login
-     * Login with username and password
-     */
-    fastify.post('/login', {
-        schema: {
-            body: {
-                type: 'object',
-                required: ['username', 'password'],
-                properties: {
-                    username: { type: 'string', minLength: 3 },
-                    password: { type: 'string', minLength: 6 }
-                }
+const loginBody = {
+    type: 'object',
+    required: ['username', 'password'],
+    additionalProperties: false,
+    properties: {
+        username: { type: 'string', minLength: 1, maxLength: 50 },
+        password: S.anyPassword,
+    },
+};
+
+/** @type {import('fastify').FastifyPluginAsync<{ services: any }>} */
+async function authRoutes(fastify, { services }) {
+    const { users, audit } = services;
+    const lockout = createLockout();
+
+    const strictLimit = { rateLimit: { max: 10, timeWindow: '15 minutes' } };
+
+    fastify.post('/login', { schema: { body: loginBody }, config: strictLimit }, async (request, reply) => {
+        const key = normalizeUsername(request.body.username);
+        const wait = lockout.lockedFor(key);
+        if (wait) throw tooMany(`تم قفل الحساب مؤقتاً بسبب محاولات فاشلة. حاول بعد ${Math.ceil(wait / 60000)} دقيقة`, 'LOCKED');
+
+        const user = await users.verifyCredentials(request.body.username, request.body.password);
+        if (!user) {
+            lockout.fail(key);
+            if ((await users.count()) === 0) {
+                throw unauthorized('النظام يحتاج لإعداد أولي. أنشئ أول حساب مشرف.', 'FIRST_RUN');
             }
+            await audit.record(null, 'login_failed', { username: key, ip: request.ip });
+            throw unauthorized('اسم المستخدم أو كلمة المرور غير صحيحة', 'BAD_CREDENTIALS');
         }
-    }, async (request, reply) => {
-        const { username, password } = request.body;
-        const normalizedUsername = username.toLowerCase().trim();
 
-        try {
-            // Fetch user from database
-            const { data: user, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('username', normalizedUsername)
-                .single();
-
-            if (error || !user) {
-                // Check if any users exist at all
-                const { count } = await supabase
-                    .from('users')
-                    .select('*', { count: 'exact', head: true });
-
-                if (count === 0) {
-                    return reply.code(401).send({
-                        error: 'FIRST_RUN',
-                        message: 'النظام يحتاج لإعداد أولي. أدخل البيانات لإنشاء أول حساب مشرف.'
-                    });
-                }
-
-                return reply.code(401).send({
-                    error: 'اسم المستخدم أو كلمة المرور غير صحيحة'
-                });
-            }
-
-            // Verify password
-            const validPassword = await bcrypt.compare(password, user.password_hash);
-            if (!validPassword) {
-                return reply.code(401).send({
-                    error: 'اسم المستخدم أو كلمة المرور غير صحيحة'
-                });
-            }
-
-            // Generate JWT token
-            const token = fastify.jwt.sign({
-                id: user.id,
-                username: user.username,
-                role: user.role
-            }, { expiresIn: '24h' });
-
-            // Log activity
-            await supabase.from('activity_logs').insert({
-                user_id: user.id,
-                action: 'login',
-                details: { ip: request.ip }
-            });
-
-            // Set cookie and return token
-            reply
-                .setCookie('token', token, {
-                    path: '/',
-                    httpOnly: true,
-                    secure: true, // Required for cross-site cookies
-                    sameSite: 'none', // Required for cross-site cookies
-                    maxAge: 86400 // 24 hours
-                })
-                .send({
-                    success: true,
-                    user: {
-                        id: user.id,
-                        username: user.username,
-                        role: user.role
-                    },
-                    token
-                });
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في الخادم' });
-        }
+        lockout.reset(key);
+        fastify.issueSession(reply, user);
+        await audit.record(user.id, 'login', { ip: request.ip });
+        return { success: true, user: publicUser(user) };
     });
 
-    /**
-     * POST /api/auth/setup
-     * Initial platform setup - Create first admin
-     */
     fastify.post('/setup', {
+        config: strictLimit,
         schema: {
             body: {
                 type: 'object',
                 required: ['username', 'password'],
-                properties: {
-                    username: { type: 'string', minLength: 3 },
-                    password: { type: 'string', minLength: 6 }
-                }
-            }
-        }
-    }, async (request, reply) => {
-        const { username, password } = request.body;
-        const normalizedUsername = username.toLowerCase().trim();
-
-        try {
-            // 1. Check if any users exist
-            const { count } = await supabase
-                .from('users')
-                .select('*', { count: 'exact', head: true });
-
-            if (count > 0) {
-                return reply.code(400).send({ error: 'النظام مهيأ بالفعل. يرجى تسجيل الدخول.' });
-            }
-
-            // 2. Create the first admin
-            const salt = await bcrypt.genSalt(12);
-            const password_hash = await bcrypt.hash(password, salt);
-
-            const { data: user, error } = await supabase
-                .from('users')
-                .insert({
-                    username: normalizedUsername,
-                    password_hash,
-                    role: 'admin'
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            return {
-                success: true,
-                message: 'تم إنشاء حساب المشرف بنجاح'
-            };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في إعداد النظام' });
-        }
+                additionalProperties: false,
+                properties: { username: S.username, password: S.newPassword },
+            },
+        },
+    }, async (request) => {
+        await users.createFirstAdmin(request.body);
+        await audit.record(null, 'setup_first_admin', { username: normalizeUsername(request.body.username), ip: request.ip });
+        return { success: true, message: 'تم إنشاء حساب المشرف بنجاح' };
     });
 
-    /**
-     * POST /api/auth/logout
-     * Clear session
-     */
     fastify.post('/logout', async (request, reply) => {
-        reply
-            .clearCookie('token', { path: '/' })
-            .send({ success: true, message: 'تم تسجيل الخروج' });
+        fastify.clearSession(reply);
+        return { success: true, message: 'تم تسجيل الخروج' };
     });
 
-    /**
-     * GET /api/auth/me
-     * Get current user info
-     */
-    fastify.get('/me', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        return {
-            user: request.user
-        };
+    fastify.post('/logout-all', { preHandler: fastify.authenticate }, async (request, reply) => {
+        await users.revokeSessions(request.user.id);
+        fastify.clearSession(reply);
+        await audit.record(request.user.id, 'logout_all', { ip: request.ip });
+        return { success: true, message: 'تم تسجيل الخروج من جميع الأجهزة' };
     });
 
-    /**
-     * PATCH /api/auth/profile
-     * Update user profile (username/password)
-     */
+    fastify.get('/me', { preHandler: fastify.authenticate }, async (request) => ({ user: request.user }));
+
+    /** Short-lived ticket the dashboard uses to open its socket connection. */
+    fastify.get('/socket-ticket', { preHandler: fastify.authenticate }, async (request) => {
+        const row = await users.getById(request.user.id);
+        return { ticket: fastify.issueTicket(row, 'socket') };
+    });
+
+    /** Short-lived ticket for direct-to-API uploads (bypasses the frontend proxy body limit). */
+    fastify.get('/upload-ticket', {
+        preHandler: [fastify.authenticate, fastify.requireRole('admin')],
+    }, async (request) => {
+        const row = await users.getById(request.user.id);
+        return { ticket: fastify.issueTicket(row, 'upload') };
+    });
+
     fastify.patch('/profile', {
-        preHandler: [fastify.authenticate],
+        preHandler: fastify.authenticate,
+        config: strictLimit,
         schema: {
             body: {
                 type: 'object',
-                properties: {
-                    username: { type: 'string', minLength: 3 },
-                    password: { type: 'string', minLength: 6 }
-                }
-            }
-        }
+                required: ['current_password'],
+                additionalProperties: false,
+                properties: { current_password: S.anyPassword, username: S.username, password: S.newPassword },
+            },
+        },
     }, async (request, reply) => {
-        const { username, password } = request.body;
-        const userId = request.user.id;
+        const { current_password, username, password } = request.body;
+        if (!username && !password) throw badRequest('لم يتم توفير بيانات للتحديث');
 
-        try {
-            const updates = {};
-
-            // 1. Handle Username Update
-            if (username) {
-                const newUsername = username.toLowerCase().trim();
-
-                // Check if username is taken by someone else
-                const { data: existingUser } = await supabase
-                    .from('users')
-                    .select('id')
-                    .eq('username', newUsername)
-                    .neq('id', userId)
-                    .single();
-
-                if (existingUser) {
-                    return reply.code(400).send({ error: 'اسم المستخدم هذا مستخدم بالفعل' });
-                }
-
-                updates.username = newUsername;
-            }
-
-            // 2. Handle Password Update
-            if (password) {
-                const salt = await bcrypt.genSalt(12);
-                updates.password_hash = await bcrypt.hash(password, salt);
-            }
-
-            if (Object.keys(updates).length === 0) {
-                return reply.code(400).send({ error: 'لم يتم توفير بيانات للتحديث' });
-            }
-
-            // 3. Update Database
-            const { data: updatedUser, error } = await supabase
-                .from('users')
-                .update(updates)
-                .eq('id', userId)
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // 4. Generate New JWT (in case username changed)
-            const token = fastify.jwt.sign({
-                id: updatedUser.id,
-                username: updatedUser.username,
-                role: updatedUser.role
-            }, { expiresIn: '24h' });
-
-            // 5. Log Activity
-            await supabase.from('activity_logs').insert({
-                user_id: userId,
-                action: 'update_profile',
-                details: {
-                    updated_fields: Object.keys(updates).filter(k => k !== 'password_hash'),
-                    ip: request.ip
-                }
-            });
-
-            // 6. Set New Cookie
-            reply.setCookie('token', token, {
-                path: '/',
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-                maxAge: 86400
-            });
-
-            return {
-                success: true,
-                message: 'تم تحديث البيانات بنجاح',
-                user: {
-                    id: updatedUser.id,
-                    username: updatedUser.username,
-                    role: updatedUser.role
-                },
-                token
-            };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في تحديث البيانات' });
+        const row = await users.getById(request.user.id, { fresh: true });
+        if (!(await users.verifyPassword(row, current_password))) {
+            throw badRequest('كلمة المرور الحالية غير صحيحة', 'BAD_PASSWORD');
         }
+
+        const result = await users.update(request.user.id, { username, password });
+        // A password change bumps token_version: re-issue this device's session.
+        if (result.row) fastify.issueSession(reply, result.row);
+        await audit.record(request.user.id, 'update_profile', { updated_fields: result.changed, ip: request.ip });
+        return { success: true, message: 'تم تحديث البيانات بنجاح', user: result.user };
     });
 }
 

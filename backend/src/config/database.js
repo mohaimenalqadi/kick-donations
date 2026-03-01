@@ -1,18 +1,16 @@
+'use strict';
+
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('❌ Missing Supabase configuration!');
-    console.error('Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in .env');
+/**
+ * Creates the Supabase client. The service-role key bypasses RLS, so this
+ * client must only ever live on the server.
+ * @param {{ supabaseUrl: string, supabaseServiceKey: string }} config
+ */
+function createDatabase(config) {
+    return createClient(config.supabaseUrl, config.supabaseServiceKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+    });
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
-
-module.exports = { supabase };
+module.exports = { createDatabase };

@@ -38,8 +38,8 @@ export default function CinematicTier({ donorName, amount, message, duration, on
 
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.CINEMATIC;
-        audioManager.preload('cinematic_alert', alertSound);
-        audioManager.play('cinematic_alert', { volume: (volume / 100) });
+        audioManager.preload(alertSound);
+        audioManager.play(alertSound, { volume: (volume / 100) });
 
         // Phase 1: High-Duration Buildup (2s - Fast)
         const nameTimer = setTimeout(() => setShowName(true), 2000);
@@ -51,7 +51,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
         }, 2500);
 
         return () => {
-            audioManager.stop('cinematic_alert');
+            audioManager.stop(alertSound);
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
@@ -133,7 +133,7 @@ export default function CinematicTier({ donorName, amount, message, duration, on
                             className="max-w-[90vw]"
                         >
                             <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.8)] break-words">
-                                "{message}"
+                                &ldquo;{message}&rdquo;
                             </p>
                         </motion.div>
                     )}

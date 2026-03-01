@@ -1,218 +1,185 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-    LayoutDashboard,
-    User,
-    Settings,
-    HelpCircle,
-    LogOut,
-    Menu,
-    X,
-    Bell,
-    ShieldCheck
-} from 'lucide-react';
-import { api } from '@/lib/api';
+import { usePathname, useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { HelpCircle, LayoutDashboard, LogOut, Menu, MonitorPlay, Settings, ShieldCheck, User as UserIcon, X } from 'lucide-react';
+import { api, ApiError } from '@/lib/api';
+import { useBranding, useMe } from '@/hooks/queries';
+import { useAdminSocket } from '@/hooks/useAdminSocket';
+import { BrandTitle, PageLoader, StatusDot } from '@/components/ui/primitives';
+import { DashboardContext } from './DashboardContext';
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+const NAV = [
+    { name: 'لوحة التحكم', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'الملف الشخصي', href: '/dashboard/profile', icon: UserIcon },
+    { name: 'المسؤولون', href: '/dashboard/responsibilities', icon: ShieldCheck, adminOnly: true },
+    { name: 'الإعدادات', href: '/dashboard/settings', icon: Settings, adminOnly: true },
+    { name: 'مركز المساعدة', href: '/dashboard/help', icon: HelpCircle },
+];
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<{ username: string; role: string } | null>(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [siteTitle, setSiteTitle] = useState('KickPay');
+    const qc = useQueryClient();
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const me = useMe();
+    const { data: branding } = useBranding();
+    const user = me.data;
+    const { connected, presence } = useAdminSocket(!!user);
 
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await api.getCurrentUser();
-                setUser(response.user);
-                // Fetch site settings for dynamic title
-                const settingsRes = await api.getSettings();
-                if (settingsRes.settings?.site_title) {
-                    setSiteTitle(settingsRes.settings.site_title);
-                }
-            } catch {
-                router.push('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (me.error instanceof ApiError && me.error.status === 401) router.replace('/login');
+    }, [me.error, router]);
 
-        checkAuth();
-    }, [router]);
+    useEffect(() => setMobileOpen(false), [pathname]);
 
-    const navItems = [
-        { name: 'لوحة التحكم', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'الملف الشخصي', href: '/dashboard/profile', icon: User },
-        { name: 'المسؤوليات', href: '/dashboard/responsibilities', icon: ShieldCheck, adminOnly: true },
-        { name: 'الإعدادات', href: '/dashboard/settings', icon: Settings, adminOnly: true },
-        { name: 'مركز المساعدة', href: '/dashboard/help', icon: HelpCircle },
-    ];
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-                <div className="text-center">
-                    <div className="animate-spin w-12 h-12 border-4 border-[#03e115] border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-gray-400 font-medium">جاري التحقق...</p>
+    if (me.isLoading) return <PageLoader label="جاري التحقق من الجلسة..." />;
+    if (!user) {
+        if (me.error && !(me.error instanceof ApiError && me.error.status === 401)) {
+            return (
+                <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
+                    <p className="font-bold">{me.error.message}</p>
+                    <button className="btn-secondary" onClick={() => me.refetch()}>إعادة المحاولة</button>
                 </div>
-            </div>
-        );
+            );
+        }
+        return <PageLoader />;
     }
 
-    if (!user) return null;
+    const isAdmin = user.role === 'admin';
+    const items = NAV.filter((i) => !i.adminOnly || isAdmin);
+    const current = items.find((i) => i.href === pathname) || items[0];
+    const overlayOnline = presence.overlayCount > 0;
+
+    async function logout() {
+        try {
+            await api.logout();
+        } finally {
+            qc.clear();
+            router.replace('/login');
+        }
+    }
+
+    const nav = (
+        <nav className="space-y-1" aria-label="التنقل الرئيسي">
+            {items.map((item) => {
+                const Icon = item.icon;
+                const active = pathname === item.href;
+                return (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? 'page' : undefined}
+                        className={`group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-colors ${
+                            active ? 'bg-brand-soft text-brand' : 'text-ink-muted hover:bg-white/[0.04] hover:text-ink'
+                        }`}
+                    >
+                        <Icon size={19} />
+                        <span>{item.name}</span>
+                        {active && <span className="mr-auto h-1.5 w-1.5 rounded-full bg-brand shadow-glow" />}
+                    </Link>
+                );
+            })}
+        </nav>
+    );
+
+    const sidebarFooter = (
+        <div className="space-y-3 border-t border-line p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-raised font-black text-brand">
+                    {user.username[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold" dir="ltr">{user.username}</p>
+                    <p className="text-[11px] font-bold text-ink-faint">{isAdmin ? 'مشرف' : 'مشرف مساعد'}</p>
+                </div>
+            </div>
+            <button onClick={logout} className="btn-ghost w-full justify-start text-danger hover:bg-danger-soft hover:text-danger">
+                <LogOut size={18} />
+                تسجيل الخروج
+            </button>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white flex">
-            {/* Sidebar Desktop */}
-            <aside className="hidden lg:flex flex-col w-64 bg-[#0f0f12] border-r border-white/5 fixed inset-y-0 right-0 z-50">
-                <div className="p-6">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 bg-[#03e115] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(3,225,21,0.3)]">
-                            <LayoutDashboard className="text-[#0a0a0a]" size={24} />
+        <DashboardContext.Provider value={{ user, isAdmin, socketConnected: connected, presence }}>
+            <div className="min-h-screen lg:flex">
+                <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:right-4 focus:top-4 focus:z-[300] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-2 focus:text-brand-ink">
+                    تخطي إلى المحتوى
+                </a>
+
+                {/* Desktop sidebar */}
+                <aside className="fixed inset-y-0 right-0 z-40 hidden w-64 flex-col border-l border-line bg-surface lg:flex">
+                    <div className="flex items-center gap-3 px-6 pb-6 pt-7">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-brand-ink shadow-glow">
+                            <MonitorPlay size={20} />
                         </div>
-                        <h1 className="text-2xl font-black italic tracking-tighter">{siteTitle.split(/(?=[A-Z])/).map((part, i) => i === siteTitle.split(/(?=[A-Z])/).length - 1 ? <span key={i} className="text-[#03e115]">{part}</span> : part)}</h1>
+                        <BrandTitle title={branding?.site_title || 'KickPay'} className="text-xl" />
                     </div>
+                    <div className="flex-1 overflow-y-auto px-3">{nav}</div>
+                    {sidebarFooter}
+                </aside>
 
-                    <nav className="space-y-1">
-                        {navItems
-                            .filter(item => !item.adminOnly || user?.role === 'admin')
-                            .map((item) => {
-                                const Icon = item.icon;
-                                const isActive = pathname === item.href;
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                            ? 'bg-[#03e115]/10 text-[#03e115]'
-                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                            }`}
-                                    >
-                                        <Icon size={20} className={isActive ? 'text-[#03e115]' : 'group-hover:scale-110 transition-transform'} />
-                                        <span className="font-bold">{item.name}</span>
-                                        {isActive && <div className="mr-auto w-1.5 h-1.5 rounded-full bg-[#03e115] shadow-[0_0_10px_#03e115]" />}
-                                    </Link>
-                                );
-                            })}
-                    </nav>
-                </div>
-
-                <div className="mt-auto p-6 border-t border-white/5">
-                    <button
-                        onClick={async () => {
-                            await api.logout();
-                            router.push('/login');
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-all font-bold"
-                    >
-                        <LogOut size={20} />
-                        <span>تسجيل الخروج</span>
+                {/* Mobile header */}
+                <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-canvas/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+                    <button onClick={() => setMobileOpen(true)} className="btn-ghost btn-sm p-2" aria-label="فتح القائمة">
+                        <Menu size={22} />
                     </button>
-                </div>
-            </aside>
-
-            {/* Mobile Header */}
-            <header className="lg:hidden fixed top-0 w-full bg-[#0f0f12]/80 backdrop-blur-xl border-b border-white/5 z-40 px-4 py-3 flex items-center justify-between">
-                <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-gray-400 hover:text-white">
-                    <Menu size={24} />
-                </button>
-                <h1 className="text-xl font-black italic">{siteTitle.split(/(?=[A-Z])/).map((part, i) => i === siteTitle.split(/(?=[A-Z])/).length - 1 ? <span key={i} className="text-[#03e115]">{part}</span> : part)}</h1>
-                <div className="w-10 h-10 bg-white/5 rounded-full" />
-            </header>
-
-            {/* Mobile Sidebar Overlay */}
-            {isSidebarOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)}>
-                    <motion.aside
-                        initial={{ x: 280 }}
-                        animate={{ x: 0 }}
-                        className="absolute right-0 top-0 bottom-0 w-72 bg-[#0f0f12] p-6 shadow-2xl"
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    >
-                        <div className="flex items-center justify-between mb-8">
-                            <h1 className="text-xl font-black italic">{siteTitle.split(/(?=[A-Z])/).map((part, i) => i === siteTitle.split(/(?=[A-Z])/).length - 1 ? <span key={i} className="text-[#03e115]">{part}</span> : part)}</h1>
-                            <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-gray-400 hover:text-white">
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <nav className="space-y-1">
-                            {navItems
-                                .filter(item => !item.adminOnly || user?.role === 'admin')
-                                .map((item) => {
-                                    const Icon = item.icon;
-                                    const isActive = pathname === item.href;
-                                    return (
-                                        <Link
-                                            key={item.href}
-                                            href={item.href}
-                                            onClick={() => setIsSidebarOpen(false)}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                                ? 'bg-[#03e115]/10 text-[#03e115]'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                }`}
-                                        >
-                                            <Icon size={20} />
-                                            <span className="font-bold">{item.name}</span>
-                                        </Link>
-                                    );
-                                })}
-                            <button
-                                onClick={async () => {
-                                    await api.logout();
-                                    router.push('/login');
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl text-red-400 hover:bg-red-400/10 transition-all font-bold"
-                            >
-                                <LogOut size={20} />
-                                <span>تسجيل الخروج</span>
-                            </button>
-                        </nav>
-                    </motion.aside>
-                </div>
-            )}
-
-            {/* Main Content Area */}
-            <main className="flex-1 lg:pr-64 pt-20 lg:pt-0">
-                <header className="hidden lg:flex items-center justify-between p-8">
-                    <div>
-                        <h2 className="text-3xl font-black text-white capitalize">
-                            {navItems.find(i => i.href === pathname)?.name || 'لوحة التحكم'}
-                        </h2>
-                        <p className="text-gray-500 font-medium">أهلاً بك مجدداً، {user.username}</p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <button className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-[#03e115] transition-all relative">
-                            <Bell size={20} />
-                            <div className="absolute top-3 right-3 w-2 h-2 bg-[#03e115] rounded-full shadow-[0_0_5px_#03e115]" />
-                        </button>
-                        <div className="flex items-center gap-3 px-4 py-2 bg-[#0f0f12] border border-white/5 rounded-2xl shadow-xl">
-                            <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl flex items-center justify-center font-bold text-[#03e115]">
-                                {user.username[0].toUpperCase()}
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm font-bold leading-tight">{user.username}</p>
-                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">
-                                    {user.role === 'admin' ? 'ADMIN' : 'MODERATOR'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <BrandTitle title={branding?.site_title || 'KickPay'} className="text-lg" />
+                    <StatusDot online={overlayOnline} />
                 </header>
 
-                <div className="px-4 lg:px-8 pb-12">
-                    {children}
+                <AnimatePresence>
+                    {mobileOpen && (
+                        <motion.div
+                            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm lg:hidden"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setMobileOpen(false)}
+                        >
+                            <motion.aside
+                                initial={{ x: 300 }}
+                                animate={{ x: 0 }}
+                                exit={{ x: 300 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                                className="absolute inset-y-0 right-0 flex w-72 flex-col bg-surface"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex items-center justify-between p-5">
+                                    <BrandTitle title={branding?.site_title || 'KickPay'} className="text-xl" />
+                                    <button onClick={() => setMobileOpen(false)} className="btn-ghost btn-sm p-2" aria-label="إغلاق القائمة">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto px-3">{nav}</div>
+                                {sidebarFooter}
+                            </motion.aside>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <div className="min-w-0 flex-1 lg:pr-64">
+                    <header className="hidden items-center justify-between gap-4 px-8 pb-2 pt-8 lg:flex">
+                        <div>
+                            <h1 className="text-2xl font-black">{current.name}</h1>
+                            <p className="mt-0.5 text-sm text-ink-muted">
+                                أهلاً بك، <span dir="ltr">{user.username}</span>
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5" title={connected ? 'متصل بالخادم' : 'غير متصل بالخادم'}>
+                            <StatusDot online={overlayOnline} label={overlayOnline ? `صفحة العرض متصلة (${presence.overlayCount})` : 'صفحة العرض غير متصلة'} />
+                            {!connected && <span className="badge bg-warning-soft text-warning">إعادة الاتصال...</span>}
+                        </div>
+                    </header>
+                    <main id="main" className="px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+                        {children}
+                    </main>
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardContext.Provider>
     );
 }

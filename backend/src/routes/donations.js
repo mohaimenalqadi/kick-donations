@@ -1,439 +1,148 @@
-const { supabase } = require('../config/database');
-const authorize = require('../middleware/authorize');
-const { validateDonation } = require('../utils/validation');
-const { calculateTier } = require('../utils/tiers');
-const { emitNewDonation, emitStatusUpdate, getConnectionStats } = require('../services/websocket');
+'use strict';
 
-/**
- * Donation Routes
- */
-async function donationRoutes(fastify, options) {
+const { safeEqual } = require('../lib/crypto');
+const { unauthorized } = require('../lib/errors');
+const { LIMITS } = require('../utils/validation');
+const S = require('./schemas');
 
-    /**
-     * GET /api/donations
-     * Get all donations with optional filters
-     */
+const donationBody = {
+    type: 'object',
+    required: ['donor_name', 'amount'],
+    additionalProperties: false,
+    properties: {
+        donor_name: { type: 'string', minLength: 1, maxLength: 200 },
+        amount: { type: 'number', minimum: LIMITS.amountMin, maximum: LIMITS.amountMax },
+        message: { type: 'string', maxLength: 1000 },
+    },
+};
+
+async function donationRoutes(fastify, { services, config }) {
+    const { donations, stats, audit, realtime } = services;
+    const staff = [fastify.authenticate, fastify.requireRole('admin', 'moderator')];
+    const admin = [fastify.authenticate, fastify.requireRole('admin')];
+
     fastify.get('/', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        try {
-            const { data: donations, error } = await supabase
-                .from('donations')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            return {
-                donations,
-                connections: getConnectionStats()
-            };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب التبرعات' });
-        }
-    });
-
-    /**
-     * GET /api/donations/queue
-     * Get pending and live donations queue for recovery
-     */
-    fastify.get('/queue', async (request, reply) => {
-        try {
-            // Fetch both live (interrupted) and pending (waiting)
-            const { data: donations, error } = await supabase
-                .from('donations')
-                .select('*')
-                .in('status', ['pending', 'live'])
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-
-            return { queue: donations || [] };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب طابور الانتظار' });
-        }
-    });
-
-    /**
-     * GET /api/donations/latest
-     * Get the latest completed donation for "Sticky" display
-     */
-    fastify.get('/latest', async (request, reply) => {
-        try {
-            const { data: donation, error } = await supabase
-                .from('donations')
-                .select('*')
-                .eq('status', 'done')
-                .order('displayed_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (error) throw error;
-
-            return { latest: donation };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب آخر تبرع' });
-        }
-    });
-
-    /**
-     * GET /api/donations/top
-     * Get top donor of the day
-     */
-    fastify.get('/top', async (request, reply) => {
-        try {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const { data: topDonation, error } = await supabase
-                .from('donations')
-                .select('donor_name, amount')
-                .gte('created_at', today.toISOString())
-                .order('amount', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (error) throw error;
-
-            return { top: topDonation };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب أفضل متبرع' });
-        }
-    });
-
-    /**
-     * POST /api/donations
-     * Create a new donation (admin only)
-     */
-    fastify.post('/', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        const { donor_name, amount, message } = request.body;
-
-        try {
-            // Validate
-            const validation = validateDonation({ donor_name, amount, message });
-            if (!validation.valid) {
-                return reply.code(400).send({ error: validation.errors.join(', ') });
-            }
-
-            const { donor_name: vName, amount: vAmount, message: vMessage } = validation.data;
-
-            // Calculate tier info
-            const tierInfo = calculateTier(vAmount);
-
-            // Create donation in DB
-            const { data: donation, error } = await supabase
-                .from('donations')
-                .insert([{
-                    donor_name: vName,
-                    amount: vAmount,
-                    message: vMessage,
-                    tier: tierInfo.name, // Fixed: use .name instead of .tier
-                    status: 'pending'
-                }])
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // Log activity
-            await supabase.from('activity_logs').insert({
-                user_id: request.user.id,
-                action: 'create_donation',
-                details: { donation_id: donation.id }
-            });
-
-            return { success: true, donation };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(400).send({ error: err.message });
-        }
-    });
-
-    /**
-     * POST /api/donations/:id/send
-     * Send donation to stream overlay
-     */
-    fastify.post('/:id/send', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        const { id } = request.params;
-
-        try {
-            // Get donation
-            const { data: donation, error: getError } = await supabase
-                .from('donations')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (getError || !donation) {
-                return reply.code(404).send({ error: 'التبرع غير موجود' });
-            }
-
-            // Update status to live
-            const { error: updateError } = await supabase
-                .from('donations')
-                .update({ status: 'live' })
-                .eq('id', id);
-
-            if (updateError) throw updateError;
-
-            // Emit to socket
-            emitNewDonation(donation);
-
-            return { success: true };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في إرسال التبرع' });
-        }
-    });
-
-    /**
-     * DELETE /api/donations/bulk
-     * Bulk delete donations (today or all)
-     */
-    fastify.delete('/bulk', {
-        preHandler: [fastify.authenticate, authorize(['admin'])],
-        schema: {}
-    }, async (request, reply) => {
-        const { period } = request.query; // 'today' or 'all'
-
-        // Check if admin
-        if (request.user.role !== 'admin') {
-            return reply.code(403).send({ error: 'صلاحية المشرف مطلوبة' });
-        }
-
-        try {
-            let query = supabase.from('donations').delete();
-
-            if (period === 'today') {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                query = query.gte('created_at', today.toISOString());
-            } else if (period === 'all') {
-                // Supabase requires a WHERE clause for delete()
-                query = query.neq('id', '00000000-0000-0000-0000-000000000000');
-            } else {
-                return reply.code(400).send({ error: 'خيار حذف غير صالح' });
-            }
-
-            const { error } = await query;
-            if (error) throw error;
-
-            return { success: true, message: `تم حذف ${period === 'today' ? 'عمليات اليوم' : 'جميع العمليات'} بنجاح` };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في الحذف الجماعي' });
-        }
-    });
-
-    /**
-     * DELETE /api/donations/:id
-     * Delete donation (admin only)
-     */
-    fastify.delete('/:id', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        const { id } = request.params;
-
-        try {
-            const { error } = await supabase
-                .from('donations')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw error;
-
-            return { success: true, message: 'تم حذف التبرع' };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في حذف التبرع' });
-        }
-    });
-
-    /**
-     * GET /api/donations/analytics
-     * Get donation analytics for charts
-     */
-    fastify.get('/analytics', {
-        preHandler: [fastify.authenticate, authorize(['admin'])],
-        schema: {}
-    }, async (request, reply) => {
-        const { start, end } = request.query;
-
-        try {
-            // Default to last 30 days if no range provided
-            const startDate = start ? new Date(start) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            const endDate = end ? new Date(end) : new Date();
-
-            // 1. Daily Trend
-            const { data: trendData, error: trendError } = await supabase
-                .rpc('get_daily_donation_count', {
-                    start_date: startDate.toISOString(),
-                    end_date: endDate.toISOString()
-                });
-
-            // If RPC doesn't exist, we'll fall back to a raw query (simplified)
-            let dailyTrend = trendData || [];
-            if (trendError) {
-                const { data: rawDonations, error: rawError } = await supabase
-                    .from('donations')
-                    .select('created_at, amount')
-                    .gte('created_at', startDate.toISOString())
-                    .lte('created_at', endDate.toISOString());
-
-                if (rawError) throw rawError;
-
-                // Simple JS aggregation
-                const groups = {};
-                rawDonations.forEach(d => {
-                    const day = d.created_at.split('T')[0];
-                    groups[day] = (groups[day] || 0) + parseFloat(d.amount);
-                });
-
-                dailyTrend = Object.keys(groups)
-                    .sort() // Chronological sort
-                    .map(day => ({ date: day, total: groups[day] }));
-            }
-
-            // 2. Tier Distribution
-            const { data: tierData, error: tierError } = await supabase
-                .from('donations')
-                .select('tier')
-                .gte('created_at', startDate.toISOString())
-                .lte('created_at', endDate.toISOString());
-
-            if (tierError) throw tierError;
-
-            const tierCounts = {};
-            tierData.forEach(d => {
-                tierCounts[d.tier] = (tierCounts[d.tier] || 0) + 1;
-            });
-            const distribution = Object.keys(tierCounts).map(tier => ({ tier, count: tierCounts[tier] }));
-
-            return { dailyTrend, distribution };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب البيانات التحليلية' });
-        }
-    });
-
-    /**
-     * GET /api/donations/stats
-     * Get donation statistics
-     */
-    fastify.get('/stats', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        try {
-            const { data, error: rpcError } = await supabase.rpc('get_platform_stats');
-
-            if (!rpcError && data && data.length > 0) {
-                const statsData = data[0];
-                return {
-                    today: {
-                        total: parseFloat(statsData.all_time_total) || 0, // Now All-Time Total
-                        count: parseInt(statsData.today_count) || 0,    // Today's Operations
-                        average: parseFloat(statsData.daily_average) || 0, // Global Daily Average
-                        today_total: parseFloat(statsData.today_total) || 0
-                    },
-                    connections: getConnectionStats()
-                };
-            }
-
-            // Fallback
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const { data: todayDonations, error } = await supabase
-                .from('donations')
-                .select('amount')
-                .gte('created_at', today.toISOString());
-
-            if (error) throw error;
-
-            const totalToday = todayDonations.reduce((sum, d) => sum + parseFloat(d.amount), 0);
-            const countToday = todayDonations.length;
-
-            return {
-                today: {
-                    total: totalToday,
-                    count: countToday,
-                    average: countToday > 0 ? (totalToday / countToday).toFixed(2) : 0
+        preHandler: staff,
+        schema: {
+            querystring: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                    ...S.pagination,
+                    status: { type: 'string', enum: ['pending', 'live', 'done'] },
+                    tier: { type: 'string', maxLength: 30 },
+                    search: { type: 'string', maxLength: 50 },
+                    flagged: { type: 'boolean' },
+                    from: { type: 'string', format: 'date-time' },
+                    to: { type: 'string', format: 'date-time' },
                 },
-                connections: getConnectionStats()
-            };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب الإحصائيات' });
-        }
+            },
+        },
+    }, async (request) => {
+        const result = await donations.list(request.query);
+        return { ...result, connections: realtime.presence() };
     });
+
+    fastify.post('/', { preHandler: staff, schema: { body: donationBody } }, async (request, reply) => {
+        const { donation } = await donations.create(request.body, { userId: request.user.id });
+        await audit.record(request.user.id, 'create_donation', { donation_id: donation.id, amount: donation.amount, flagged: donation.flagged });
+        reply.code(201);
+        return { success: true, donation };
+    });
+
+    fastify.post('/:id/send', { preHandler: staff, schema: { params: S.idParams } }, async (request) => {
+        const donation = await donations.send(request.params.id);
+        await audit.record(request.user.id, 'send_donation', { donation_id: donation.id });
+        return { success: true, donation };
+    });
+
+    fastify.get('/:id/original', { preHandler: admin, schema: { params: S.idParams } }, async (request) => ({
+        original: await donations.getOriginal(request.params.id),
+    }));
+
+    fastify.post('/:id/approve', { preHandler: admin, schema: { params: S.idParams } }, async (request) => {
+        const donation = await donations.approveMessage(request.params.id);
+        await audit.record(request.user.id, 'approve_message', { donation_id: donation.id });
+        return { success: true, donation };
+    });
+
+    fastify.delete('/bulk', {
+        preHandler: admin,
+        schema: {
+            querystring: {
+                type: 'object',
+                required: ['period'],
+                additionalProperties: false,
+                properties: { period: { type: 'string', enum: ['today', 'all'] } },
+            },
+        },
+    }, async (request) => {
+        const { period } = request.query;
+        const deleted = await donations.bulkRemove(period);
+        await audit.record(request.user.id, 'bulk_delete_donations', { period, deleted });
+        return { success: true, deleted, message: `تم حذف ${period === 'today' ? 'عمليات اليوم' : 'جميع العمليات'} بنجاح (${deleted})` };
+    });
+
+    fastify.delete('/:id', { preHandler: admin, schema: { params: S.idParams } }, async (request) => {
+        await donations.remove(request.params.id);
+        await audit.record(request.user.id, 'delete_donation', { donation_id: request.params.id });
+        return { success: true, message: 'تم حذف التبرع' };
+    });
+
+    fastify.get('/stats', { preHandler: staff }, async () => ({
+        stats: await stats.summary(),
+        connections: realtime.presence(),
+    }));
+
+    fastify.get('/analytics', {
+        preHandler: admin,
+        schema: {
+            querystring: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                    start: { type: 'string', format: 'date-time' },
+                    end: { type: 'string', format: 'date-time' },
+                },
+            },
+        },
+    }, async (request) => {
+        const end = request.query.end ? new Date(request.query.end) : new Date();
+        const start = request.query.start ? new Date(request.query.start) : new Date(end.getTime() - 30 * 86400_000);
+        return stats.analytics({ start, end });
+    });
+
     /**
-     * POST /api/donations/sms-auto
-     * Auto-create donation from SMS automation (n8n)
-     * Protected by API Key (no login required)
+     * POST /api/donations/sms-auto — automation webhook (n8n).
+     * Authenticated by X-Api-Key, not by cookie, so CSRF checks do not apply.
+     * Send `reference` (e.g. the transfer/SMS id) or an Idempotency-Key header
+     * so retries never create the same donation twice.
      */
-    fastify.post('/sms-auto', async (request, reply) => {
-        // التحقق من مفتاح API
-        const apiKey = request.headers['x-api-key'];
-        const validKey = process.env.SMS_AUTOMATION_KEY;
-
-        if (!apiKey || apiKey !== validKey || !validKey) {
-            return reply.code(401).send({ error: 'مفتاح API غير صالح' });
+    fastify.post('/sms-auto', {
+        config: { csrf: false, rateLimit: { max: 60, timeWindow: '1 minute' } },
+        schema: {
+            body: {
+                type: 'object',
+                required: ['donor_name', 'amount'],
+                properties: {
+                    ...donationBody.properties,
+                    donor_phone: { type: 'string', maxLength: 30 },
+                    reference: { type: 'string', minLength: 1, maxLength: 120 },
+                },
+            },
+        },
+    }, async (request, reply) => {
+        if (!config.smsAutomationKey || !safeEqual(String(request.headers['x-api-key'] || ''), config.smsAutomationKey)) {
+            throw unauthorized('مفتاح API غير صالح', 'BAD_API_KEY');
         }
-
-        const { donor_name, amount, message, donor_phone } = request.body;
-
-        try {
-            // التحقق من البيانات
-            const validation = validateDonation({ donor_name, amount, message });
-            if (!validation.valid) {
-                return reply.code(400).send({ error: validation.errors.join(', ') });
-            }
-
-            const { donor_name: vName, amount: vAmount, message: vMessage } = validation.data;
-            const tierInfo = calculateTier(vAmount);
-
-            // إنشاء التبرع في قاعدة البيانات (status = 'live' لأنه يُرسل فوراً)
-            const { data: donation, error } = await supabase
-                .from('donations')
-                .insert([{
-                    donor_name: vName,
-                    amount: vAmount,
-                    message: vMessage,
-                    tier: tierInfo.name,
-                    status: 'live',
-                    displayed_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // إرسال للبث مباشرة عبر WebSocket
-            emitNewDonation(donation);
-
-            return { success: true, donation };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(400).send({ error: err.message });
-        }
+        const idem = request.body.reference || request.headers['idempotency-key'] || null;
+        const { donation, duplicate } = await donations.create(
+            { donor_name: request.body.donor_name, amount: request.body.amount, message: request.body.message },
+            { status: 'live', idempotencyKey: idem ? `sms:${String(idem).slice(0, 120)}` : null }
+        );
+        if (!duplicate) await audit.record(null, 'sms_auto_donation', { donation_id: donation.id, amount: donation.amount });
+        reply.code(duplicate ? 200 : 201);
+        return { success: true, duplicate, donation: { id: donation.id, status: donation.status, tier: donation.tier } };
     });
 }
 

@@ -3,7 +3,7 @@
 
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { BACKGROUND_ASSETS } from '@/lib/audio';
+import { audioManager, BACKGROUND_ASSETS } from '@/lib/audio';
 import TierBackground from './TierBackground';
 
 interface FiftyTierProps {
@@ -14,14 +14,23 @@ interface FiftyTierProps {
     backgroundUrl?: string;
     duration?: number;
     onComplete?: () => void;
+    soundUrl?: string;
+    volume?: number;
 }
 
-export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000, onComplete }: FiftyTierProps) {
+export default function FiftyTier({ donor, amount, message, color = '#ff007f', backgroundUrl, duration = 120000, onComplete, soundUrl, volume = 80 }: FiftyTierProps) {
     const count = useSpring(0, { stiffness: 90, damping: 20 });
     const rounded = useTransform(count, latest => Math.round(latest));
 
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
+
+    // Optional custom alert sound (the background video carries its own audio by default).
+    useEffect(() => {
+        if (!soundUrl) return;
+        audioManager.play(soundUrl, { volume: volume / 100 });
+        return () => audioManager.stop(soundUrl);
+    }, [soundUrl, volume]);
 
     useEffect(() => {
         // Phase 1: Name reveal (5.5s)
@@ -52,6 +61,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                 <TierBackground
                     url={backgroundUrl}
                     fallbackUrl={BACKGROUND_ASSETS.CINEMATIC}
+                    volume={volume}
                 />
             </div>
 
@@ -118,7 +128,7 @@ export default function FiftyTier({ donor, amount, message, color = '#ff007f', b
                             className="max-w-[90vw]"
                         >
                             <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/90 leading-tight drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] break-words">
-                                "{message}"
+                                &ldquo;{message}&rdquo;
                             </p>
                         </motion.div>
                     )}
