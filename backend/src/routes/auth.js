@@ -26,11 +26,11 @@ async function authRoutes(fastify, options) {
         const normalizedUsername = username.toLowerCase().trim();
 
         try {
-            // Fetch user from database
+            // Fetch user from database - case insensitive lookup
             const { data: user, error } = await supabase
                 .from('users')
                 .select('*')
-                .eq('username', normalizedUsername)
+                .ilike('username', normalizedUsername)
                 .single();
 
             if (error || !user) {

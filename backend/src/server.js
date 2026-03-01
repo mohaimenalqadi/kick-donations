@@ -79,7 +79,11 @@ async function buildServer() {
             const decoded = fastify.jwt.verify(token);
             request.user = decoded;
         } catch (err) {
-            return reply.code(401).send({ error: 'جلسة منتهية - يرجى إعادة تسجيل الدخول' });
+            fastify.log.error('JWT Verification Failed:', err.message);
+            return reply.code(401).send({
+                error: 'جلسة منتهية - يرجى إعادة تسجيل الدخول',
+                details: 'Invalid or expired session token'
+            });
         }
     });
 
