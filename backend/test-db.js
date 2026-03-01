@@ -16,23 +16,12 @@ async function testConnection() {
     console.log('Testing Supabase connection...');
 
     // Check users table
-    const { data: users, error: userError } = await supabase.from('users').select('count', { count: 'exact', head: true });
+    const { data: users, error: userError } = await supabase.from('users').select('id, username, role');
     if (userError) {
         console.error('❌ Error accessing users table:', userError);
     } else {
-        console.log('✅ Users table accessible. Count:', users);
+        console.log('✅ Users found:', users.map(u => ({ id: u.id, username: u.username, role: u.role })));
     }
-
-    // Check donations table
-    const { data: donations, error: donationError } = await supabase.from('donations').select('count', { count: 'exact', head: true });
-    if (donationError) {
-        console.error('❌ Error accessing donations table:', donationError);
-    } else {
-        console.log('✅ Donations table accessible. Count:', donations);
-    }
-
-    // Test insert (rollback or just a dummy check?)
-    // Actually, just reading schema info if possible, but reading is enough to prove existence.
 }
 
 testConnection();

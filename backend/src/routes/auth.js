@@ -23,13 +23,14 @@ async function authRoutes(fastify, options) {
         }
     }, async (request, reply) => {
         const { username, password } = request.body;
+        const normalizedUsername = username.toLowerCase().trim();
 
         try {
             // Fetch user from database
             const { data: user, error } = await supabase
                 .from('users')
                 .select('*')
-                .eq('username', username.toLowerCase().trim())
+                .eq('username', normalizedUsername)
                 .single();
 
             if (error || !user) {
@@ -77,8 +78,8 @@ async function authRoutes(fastify, options) {
                 .setCookie('token', token, {
                     path: '/',
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'lax',
+                    secure: true, // Required for cross-site cookies
+                    sameSite: 'none', // Required for cross-site cookies
                     maxAge: 86400 // 24 hours
                 })
                 .send({
@@ -94,6 +95,62 @@ async function authRoutes(fastify, options) {
         } catch (err) {
             fastify.log.error(err);
             return reply.code(500).send({ error: 'خطأ في الخادم' });
+        }
+    });
+
+    /**
+     * POST /api/auth/setup
+     * Initial platform setup - Create first admin
+     */
+    fastify.post('/setup', {
+        schema: {
+            body: {
+                type: 'object',
+                required: ['username', 'password'],
+                properties: {
+                    username: { type: 'string', minLength: 3 },
+                    password: { type: 'string', minLength: 6 }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const { username, password } = request.body;
+        const normalizedUsername = username.toLowerCase().trim();
+
+        try {
+            // 1. Check if any users exist
+            const { count } = await supabase
+                .from('users')
+                .select('*', { count: 'exact', head: true });
+
+            if (count > 0) {
+                return reply.code(400).send({ error: 'النظام مهيأ بالفعل. يرجى تسجيل الدخول.' });
+            }
+
+            // 2. Create the first admin
+            const salt = await bcrypt.genSalt(12);
+            const password_hash = await bcrypt.hash(password, salt);
+
+            const { data: user, error } = await supabase
+                .from('users')
+                .insert({
+                    username: normalizedUsername,
+                    password_hash,
+                    role: 'admin'
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            return {
+                success: true,
+                message: 'تم إنشاء حساب المشرف بنجاح'
+            };
+
+        } catch (err) {
+            fastify.log.error(err);
+            return reply.code(500).send({ error: 'خطأ في إعداد النظام' });
         }
     });
 
@@ -201,8 +258,8 @@ async function authRoutes(fastify, options) {
             reply.setCookie('token', token, {
                 path: '/',
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
+                secure: true,
+                sameSite: 'none',
                 maxAge: 86400
             });
 
