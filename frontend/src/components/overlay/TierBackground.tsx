@@ -1,118 +1,66 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface TierBackgroundProps {
     url?: string;
     fallbackUrl: string;
     opacity?: number;
     volume?: number;
+    className?: string;
+    style?: React.CSSProperties;
 }
 
+const VIDEO_RE = /\.(mp4|webm|ogv|mov)(\?|#|$)|pixabay\.com\/video|\/video\//i;
+const IMAGE_HINT_RE = /\.(gif|png|jpe?g|webp|avif)(\?|#|$)|giphy\.com|tenor\.com/i;
+
 /**
- * Hybrid Media Renderer
- * Handles both video (MP4/WebM) and image (GIF/PNG/JPG) backgrounds.
- * Prioritizes the provided 'url' (from settings) and falls back to 'fallbackUrl'.
+ * Renders a tier background (video or image). If the custom URL fails to
+ * load, it falls back to the built-in asset instead of showing nothing.
  */
 export default function TierBackground({
     url,
     fallbackUrl,
     opacity = 1,
     volume = 100,
-    className = "absolute inset-0 z-0 overflow-hidden",
-    style
-}: TierBackgroundProps & { className?: string; style?: React.CSSProperties }) {
-    const finalUrl = url || fallbackUrl;
-    const videoRef = React.useRef<HTMLVideoElement>(null);
+    className = 'absolute inset-0 z-0 overflow-hidden',
+    style,
+}: TierBackgroundProps) {
+    const [failed, setFailed] = useState(false);
+    useEffect(() => setFailed(false), [url]);
 
-    // Sync volume with video ref
+    const src = !url || failed ? fallbackUrl : url;
+    const isVideo = useMemo(() => VIDEO_RE.test(src) && !IMAGE_HINT_RE.test(src), [src]);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
     useEffect(() => {
-        if (videoRef.current) {
-            // Use 100% volume by default unless specified
-            videoRef.current.volume = (volume) / 100;
-        }
-    }, [volume]);
+        if (videoRef.current) videoRef.current.volume = Math.min(1, Math.max(0, volume / 100));
+    }, [volume, src]);
 
-    // Diagnostic logging
-    useEffect(() => {
-        console.log('[TierBackground] Component Mount/Update:', {
-            providedUrl: url,
-            fallbackUrl,
-            resolvedUrl: finalUrl,
-            timestamp: new Date().toISOString()
-        });
-    }, [url, fallbackUrl, finalUrl]);
-
-    // Media type detection logic
-    const isVideo = useMemo(() => {
-        if (!finalUrl) return false;
-        const lowerUrl = finalUrl.toLowerCase();
-
-        // Comprehensive video detection
-        const detected =
-            lowerUrl.endsWith('.mp4') ||
-            lowerUrl.endsWith('.webm') ||
-            lowerUrl.endsWith('.ogg') ||
-            lowerUrl.includes('pixabay.com/video') ||
-            lowerUrl.includes('vimeo.com') ||
-            lowerUrl.includes('youtube.com/embed');
-
-        return detected;
-    }, [finalUrl]);
-
-    // Force image if specifically requested or if it's a known GIF source
-    const isKnownGif = useMemo(() => {
-        if (!finalUrl) return false;
-        const lowerUrl = finalUrl.toLowerCase();
-        return lowerUrl.includes('giphy.com') ||
-            lowerUrl.includes('tenor.com') ||
-            lowerUrl.includes('.gif') ||
-            lowerUrl.endsWith('.gif');
-    }, [finalUrl]);
-
-    if (isVideo && !isKnownGif) {
-        return (
-            <div className={className} style={style}>
-                <video
-                    ref={videoRef}
-                    key={finalUrl}
-                    src={finalUrl}
-                    autoPlay
-                    loop
-                    muted={false} // Ensure sound is ON
-                    playsInline
-                    className="w-full h-full object-cover"
-                    style={{ opacity }}
-                    onLoadedData={() => {
-                        console.log('[TierBackground] ✅ Video loaded:', finalUrl);
-                        if (videoRef.current) {
-                            videoRef.current.play().catch(err => console.error('AutoPlay failed:', err));
-                        }
-                    }}
-                    onError={() => console.error('[TierBackground] ❌ Video failed:', finalUrl)}
-                />
-            </div>
-        );
-    }
+    const onError = () => {
+        if (src !== fallbackUrl) setFailed(true);
+    };
 
     return (
         <div className={className} style={style}>
-            <img
-                key={finalUrl}
-                src={finalUrl}
-                alt=""
-                className="w-full h-full object-cover"
-                style={{ opacity }}
-                onLoad={() => console.log('[TierBackground] ✅ Image loaded:', finalUrl)}
-                onError={(e) => {
-                    console.error('[TierBackground] ❌ Image failed:', finalUrl);
-                    // If image fails, try to show the fallback if we aren't already
-                    if (url && fallbackUrl && finalUrl === url) {
-                        console.log('[TierBackground] Attempting fallback to:', fallbackUrl);
-                    }
-                }}
-            />
+            {isVideo ? (
+                <video
+                    ref={videoRef}
+                    key={src}
+                    src={src}
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="h-full w-full object-cover"
+                    style={{ opacity }}
+                    onLoadedData={() => videoRef.current?.play().catch(() => undefined)}
+                    onError={onError}
+                />
+            ) : (
+                // eslint-disable-next-line @next/next/no-img-element -- arbitrary remote media, sized by container
+                <img key={src} src={src} alt="" className="h-full w-full object-cover" style={{ opacity }} onError={onError} />
+            )}
         </div>
     );
-};
-
+}

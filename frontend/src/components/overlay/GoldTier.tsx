@@ -23,7 +23,6 @@ interface GoldTierProps {
 export default function GoldTier({ donorName, amount, message, duration, onComplete, soundUrl, backgroundUrl, volume = 80 }: GoldTierProps) {
     const [showName, setShowName] = useState(false);
     const [showAmount, setShowAmount] = useState(false);
-    const [showOverlay, setShowOverlay] = useState(false);
 
     // Retuning for "faster" but still professional count
     const count = useSpring(0, { stiffness: 60, damping: 20 });
@@ -40,11 +39,10 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
 
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.LEGENDARY;
-        audioManager.preload('gold_alert', alertSound);
-        audioManager.play('gold_alert', { volume: (volume / 100) });
+        audioManager.preload(alertSound);
+        audioManager.play(alertSound, { volume: (volume / 100) });
 
         // Phase 1: Name reveal (2s - Fast)
-        const overlayTimer = setTimeout(() => setShowOverlay(true), 1500);
         const nameTimer = setTimeout(() => setShowName(true), 2000);
 
         // Phase 2: Amount reveal (2.5s)
@@ -54,8 +52,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
         }, 2500);
 
         return () => {
-            audioManager.stop('gold_alert');
-            clearTimeout(overlayTimer);
+            audioManager.stop(alertSound);
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
         };
@@ -132,7 +129,7 @@ export default function GoldTier({ donorName, amount, message, duration, onCompl
                                 className="max-w-[90vw]"
                             >
                                 <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words">
-                                    "{message}"
+                                    &ldquo;{message}&rdquo;
                                 </p>
                             </motion.div>
                         )}

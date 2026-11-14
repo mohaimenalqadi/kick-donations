@@ -1,71 +1,61 @@
-const { supabase } = require('../config/database');
+'use strict';
 
-/**
- * Settings Routes
- */
-async function settingsRoutes(fastify, options) {
+const S = require('./schemas');
 
-    /**
-     * GET /api/settings
-     * Get platform configuration
-     */
-    fastify.get('/', async (request, reply) => {
-        try {
-            const { data, error } = await supabase
-                .from('platform_settings')
-                .select('*')
-                .single();
+const tierPatch = {
+    type: 'object',
+    additionalProperties: false,
+    minProperties: 1,
+    properties: {
+        label: { type: 'string', minLength: 1, maxLength: 50 },
+        min_amount: { type: 'number', minimum: 0.01, maximum: 10000 },
+        max_amount: { type: ['number', 'null'], minimum: 0.01, maximum: 10000 },
+        color: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$' },
+        duration: { type: 'integer', minimum: 3000, maximum: 300000 },
+        volume: { type: 'integer', minimum: 0, maximum: 100 },
+        background_url: S.mediaUrl,
+        sound_url: S.mediaUrl,
+    },
+};
 
-            if (error) throw error;
-            return { settings: data };
+/** Platform & tier configuration (admin). */
+async function settingsRoutes(fastify, { services }) {
+    const { settings, tiers, audit, realtime } = services;
+    const admin = [fastify.authenticate, fastify.requireRole('admin')];
+    const staff = [fastify.authenticate, fastify.requireRole('admin', 'moderator')];
 
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في جلب الإعدادات' });
-        }
+    fastify.get('/settings', { preHandler: staff }, async () => ({ settings: await settings.getPublic() }));
+
+    fastify.patch('/settings', {
+        preHandler: admin,
+        schema: {
+            body: {
+                type: 'object',
+                additionalProperties: false,
+                minProperties: 1,
+                properties: {
+                    site_title: { type: 'string', minLength: 1, maxLength: 40 },
+                    currency: { type: 'string', enum: ['LYD', 'USD', 'EUR'] },
+                    tts_enabled: { type: 'boolean' },
+                    tts_voice: { type: 'string', maxLength: 60 },
+                    mute_overlay: { type: 'boolean' },
+                },
+            },
+        },
+    }, async (request) => {
+        const updated = await settings.update(request.body);
+        realtime.settingsChanged(updated);
+        await audit.record(request.user.id, 'update_settings', { fields: Object.keys(request.body) });
+        return { success: true, settings: updated };
     });
 
-    /**
-     * PATCH /api/settings
-     * Update platform configuration (admin only)
-     */
-    fastify.patch('/', {
-        preHandler: [fastify.authenticate]
-    }, async (request, reply) => {
-        if (request.user.role !== 'admin') {
-            return reply.code(403).send({ error: 'صلاحية المشرف مطلوبة' });
-        }
+    fastify.get('/tier-settings', { preHandler: staff }, async () => ({ tiers: await tiers.list() }));
 
-        const updates = request.body;
-
-        try {
-            const { data: settings, error: getError } = await supabase
-                .from('platform_settings')
-                .select('id')
-                .single();
-
-            if (getError) throw getError;
-
-            const { data, error } = await supabase
-                .from('platform_settings')
-                .update(updates)
-                .eq('id', settings.id)
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // Broadcast settings update to all connected clients (including Overlay)
-            if (global.io) {
-                global.io.emit('settingsUpdate', data);
-            }
-
-            return { success: true, settings: data };
-
-        } catch (err) {
-            fastify.log.error(err);
-            return reply.code(500).send({ error: 'خطأ في تحديث الإعدادات' });
-        }
+    fastify.patch('/tier-settings/:id', { preHandler: admin, schema: { params: S.idParams, body: tierPatch } }, async (request) => {
+        const tier = await tiers.update(request.params.id, request.body);
+        realtime.tiersChanged(await tiers.list({ fresh: true }));
+        await audit.record(request.user.id, 'update_tier', { tier_key: tier.tier_key, fields: Object.keys(request.body) });
+        return { success: true, tier };
     });
 }
 

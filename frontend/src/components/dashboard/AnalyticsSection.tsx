@@ -1,385 +1,177 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, Filter, Calendar } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { BarChart3, Table2 } from 'lucide-react';
+import { api } from '@/lib/api';
+import { qk, useTiers } from '@/hooks/queries';
+import { tierByKey } from '@/lib/tiers';
+import { formatAmount } from '@/lib/format';
+import { EmptyState, SectionHeader } from '@/components/ui/primitives';
 
-interface AnalyticsData {
-    dailyTrend: { date: string; total: number }[];
-    distribution: { tier: string; count: number }[];
+const RANGES = [
+    { days: 7, label: '7 أيام' },
+    { days: 30, label: '30 يوماً' },
+    { days: 90, label: '90 يوماً' },
+];
+
+// Single-series charts: one brand hue, recessive grid/axes, text in ink tokens.
+const SERIES = '#03e115';
+const GRID = 'rgba(255,255,255,0.06)';
+const AXIS = '#71717a';
+
+const dayFmt = new Intl.DateTimeFormat('ar-LY', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+function ChartTooltip({ active, payload, label, currency, kind }: {
+    active?: boolean;
+    payload?: { value: number; payload: Record<string, number | string> }[];
+    label?: string;
+    currency?: string;
+    kind: 'trend' | 'tier';
+}) {
+    if (!active || !payload?.length) return null;
+    const p = payload[0].payload;
+    return (
+        <div className="rounded-xl border border-line-strong bg-surface-raised px-3 py-2 text-xs shadow-xl">
+            <p className="mb-1 font-bold text-ink">{kind === 'trend' ? dayFmt.format(new Date(String(label))) : String(p.name)}</p>
+            <p className="text-ink-muted">
+                المبلغ: <b className="text-ink" dir="ltr">{formatAmount(Number(p.total), currency)}</b>
+            </p>
+            <p className="text-ink-muted">العمليات: <b className="text-ink">{p.count}</b></p>
+        </div>
+    );
 }
 
-interface AnalyticsSectionProps {
-    data: AnalyticsData;
-    isLoading: boolean;
-    onDateChange: (start: string, end: string) => void;
-}
+export default function AnalyticsSection({ currency }: { currency?: string }) {
+    const [days, setDays] = useState(30);
+    const [asTable, setAsTable] = useState(false);
+    const { data: tiers } = useTiers();
 
-interface ChartPoint {
-    x: number;
-    y: number;
-    value: number;
-}
+    // Stable range per selection (rounded to the hour) so the query key doesn't churn.
+    const { start, end } = useMemo(() => {
+        const e = new Date();
+        e.setMinutes(59, 59, 999);
+        const s = new Date(e.getTime() - days * 86400_000);
+        return { start: s.toISOString(), end: e.toISOString() };
+    }, [days]);
 
-const TIER_COLORS: Record<string, string> = {
-    basic: '#10b981',
-    medium: '#3b82f6',
-    professional: '#8b5cf6',
-    cinematic: '#f59e0b',
-    legendary: '#ef4444',
-};
+    const { data, isLoading } = useQuery({
+        queryKey: qk.analytics(start, end),
+        queryFn: () => api.analytics(start, end),
+    });
 
-const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ data, isLoading, onDateChange }) => {
-    const [trendType, setTrendType] = React.useState<'area' | 'bar'>('area');
-    const [distType, setDistType] = React.useState<'bars' | 'pie'>('bars');
-
-    // 1. Calculate Trend Chart Data (SVG Path / Bars)
-    const trendConfig = useMemo(() => {
-        if (!data.dailyTrend || data.dailyTrend.length === 0) return null;
-        const width = 800;
-        const height = 200;
-        const padding = 20;
-
-        const maxVal = Math.max(...data.dailyTrend.map(d => Number(d.total) || 0), 1);
-
-        const points: ChartPoint[] = data.dailyTrend.length === 1
-            ? [
-                {
-                    x: padding,
-                    y: height - ((Number(data.dailyTrend[0].total) / maxVal) * (height - padding * 2) + padding),
-                    value: Number(data.dailyTrend[0].total)
-                },
-                {
-                    x: width - padding,
-                    y: height - ((Number(data.dailyTrend[0].total) / maxVal) * (height - padding * 2) + padding),
-                    value: Number(data.dailyTrend[0].total)
-                }
-            ]
-            : data.dailyTrend.map((d, i) => ({
-                x: (i / (data.dailyTrend.length - 1)) * (width - padding * 2) + padding,
-                y: height - ((Number(d.total) / maxVal) * (height - padding * 2) + padding),
-                value: Number(d.total)
-            }));
-
-        const pathData = points.reduce((acc, p, i) =>
-            acc + (i === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`), "");
-
-        const areaData = pathData + ` L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
-
-        return { points, pathData, areaData, width, height, maxVal, padding };
-    }, [data.dailyTrend]);
-
-    // 2. Calculate Pie Chart Data
-    const pieData = useMemo(() => {
-        const total = data.distribution.reduce((acc, d) => acc + d.count, 0);
-        if (total === 0) return [];
-
-        let currentAngle = -Math.PI / 2;
-        return ['basic', 'medium', 'professional', 'cinematic', 'legendary'].map(tier => {
-            const item = data.distribution.find(d => d.tier === tier);
-            const count = item?.count || 0;
-            const percentage = count / total;
-            const angle = percentage * Math.PI * 2;
-
-            const startAngle = currentAngle;
-            const endAngle = currentAngle + angle;
-            currentAngle += angle;
-
-            return { tier, count, percentage, startAngle, endAngle };
-        });
-    }, [data.distribution]);
+    const trend = data?.dailyTrend ?? [];
+    const dist = (data?.distribution ?? [])
+        .map((d) => ({ ...d, name: tierByKey(tiers, d.tier)?.label || d.tier, min: tierByKey(tiers, d.tier)?.min_amount ?? 0 }))
+        .sort((a, b) => Number(a.min) - Number(b.min));
+    const periodTotal = trend.reduce((s, d) => s + d.total, 0);
+    const periodCount = trend.reduce((s, d) => s + d.count, 0);
 
     return (
-        <div className={`space-y-8 animate-in fade-in duration-700 relative ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-            {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-[#03e115] border-t-transparent rounded-full animate-spin" />
+        <section aria-labelledby="analytics-title" className="card p-4 sm:p-6">
+            <SectionHeader
+                title="التحليلات"
+                description={data ? `${formatAmount(periodTotal, currency)} من ${periodCount} عملية خلال الفترة` : undefined}
+                action={
+                    <div className="flex items-center gap-2">
+                        <div className="flex rounded-xl border border-line bg-surface-sunken p-1" role="group" aria-label="الفترة الزمنية">
+                            {RANGES.map((r) => (
+                                <button
+                                    key={r.days}
+                                    onClick={() => setDays(r.days)}
+                                    aria-pressed={days === r.days}
+                                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${days === r.days ? 'bg-brand text-brand-ink' : 'text-ink-muted hover:text-ink'}`}
+                                >
+                                    {r.label}
+                                </button>
+                            ))}
+                        </div>
+                        <button className="btn-ghost btn-sm p-2" onClick={() => setAsTable((v) => !v)} aria-pressed={asTable} title={asTable ? 'عرض كرسوم' : 'عرض كجدول'}>
+                            {asTable ? <BarChart3 size={16} /> : <Table2 size={16} />}
+                        </button>
+                    </div>
+                }
+            />
+
+            {isLoading ? (
+                <div className="grid gap-4 lg:grid-cols-5">
+                    <div className="skeleton h-64 lg:col-span-3" />
+                    <div className="skeleton h-64 lg:col-span-2" />
+                </div>
+            ) : trend.length === 0 ? (
+                <EmptyState icon={BarChart3} title="لا توجد بيانات في هذه الفترة" />
+            ) : asTable ? (
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <DataTable title="حسب اليوم" rows={trend.map((d) => ({ k: dayFmt.format(new Date(d.date)), total: d.total, count: d.count }))} currency={currency} />
+                    <DataTable title="حسب الفئة" rows={dist.map((d) => ({ k: d.name, total: d.total, count: d.count }))} currency={currency} />
+                </div>
+            ) : (
+                <div className="grid gap-6 lg:grid-cols-5">
+                    <figure className="lg:col-span-3">
+                        <figcaption className="mb-3 text-sm font-bold text-ink-muted">إجمالي الدعم اليومي</figcaption>
+                        <div className="h-64" dir="ltr">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor={SERIES} stopOpacity={0.28} />
+                                            <stop offset="100%" stopColor={SERIES} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid stroke={GRID} vertical={false} />
+                                    <XAxis dataKey="date" tickFormatter={(v) => dayFmt.format(new Date(v))} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={24} />
+                                    <YAxis tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
+                                    <Tooltip content={<ChartTooltip currency={currency} kind="trend" />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1 }} />
+                                    <Area type="monotone" dataKey="total" stroke={SERIES} strokeWidth={2} fill="url(#trendFill)" activeDot={{ r: 5, strokeWidth: 2, stroke: '#111114' }} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </figure>
+                    <figure className="lg:col-span-2">
+                        <figcaption className="mb-3 text-sm font-bold text-ink-muted">عدد العمليات حسب الفئة</figcaption>
+                        <div className="h-64" dir="ltr">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={dist} layout="vertical" margin={{ top: 0, right: 8, left: 8, bottom: 0 }} barCategoryGap={6}>
+                                    <CartesianGrid stroke={GRID} horizontal={false} />
+                                    <XAxis type="number" allowDecimals={false} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} />
+                                    <YAxis type="category" dataKey="name" orientation="right" width={92} tick={{ fill: '#a1a1aa', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<ChartTooltip currency={currency} kind="tier" />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                                    <Bar dataKey="count" fill={SERIES} radius={[4, 4, 4, 4]} maxBarSize={22} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </figure>
                 </div>
             )}
+        </section>
+    );
+}
 
-            {/* Header / Filter */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#03e115]/10 flex items-center justify-center text-[#03e115]">
-                        <BarChart3 size={20} />
-                    </div>
-                    <h2 className="text-2xl font-black text-white">التحليلات المتقدمة</h2>
-                </div>
-
-                <div className="flex items-center gap-2 bg-[#0f0f12] p-1.5 rounded-2xl border border-white/5">
-                    {[
-                        { label: 'آخر 7 أيام', days: 7 },
-                        { label: 'آخر 30 يوم', days: 30 },
-                    ].map((period) => (
-                        <button
-                            key={period.days}
-                            onClick={() => {
-                                const end = new Date();
-                                const start = new Date(Date.now() - period.days * 24 * 60 * 60 * 1000);
-                                onDateChange(start.toISOString(), end.toISOString());
-                            }}
-                            className="px-4 py-2 rounded-xl text-[10px] font-black uppercase text-gray-500 hover:text-white hover:bg-white/5 transition-all"
-                        >
-                            {period.label}
-                        </button>
-                    ))}
-                    <div className="w-px h-4 bg-white/10 mx-2" />
-                    <input
-                        type="date"
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                const start = new Date(e.target.value);
-                                const end = new Date(start);
-                                end.setHours(23, 59, 59);
-                                onDateChange(start.toISOString(), end.toISOString());
-                            }
-                        }}
-                        className="bg-transparent text-[10px] font-black text-gray-400 focus:outline-none cursor-pointer uppercase"
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-                {/* 1. Trend Chart Card */}
-                <div className="lg:col-span-8 bg-[#0f0f12] border border-white/5 rounded-[40px] p-8 relative overflow-hidden group">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">إجمالي التبرعات</p>
-                            <h3 className="text-xl font-black text-white">التوجه الزمني</h3>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl">
-                            <button
-                                onClick={() => setTrendType('area')}
-                                className={`p-2 rounded-lg transition-all ${trendType === 'area' ? 'bg-[#03e115] text-black' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                <TrendingUp size={16} />
-                            </button>
-                            <button
-                                onClick={() => setTrendType('bar')}
-                                className={`p-2 rounded-lg transition-all ${trendType === 'bar' ? 'bg-[#03e115] text-black' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                <BarChart3 size={16} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="h-[220px] w-full mt-4 flex items-end">
-                        {trendConfig ? (
-                            <svg viewBox={`0 0 ${trendConfig.width} ${trendConfig.height}`} className="w-full h-full">
-                                <defs>
-                                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#03e115" stopOpacity="0.3" />
-                                        <stop offset="100%" stopColor="#03e115" stopOpacity="0" />
-                                    </linearGradient>
-                                </defs>
-                                {trendType === 'area' ? (
-                                    <>
-                                        <motion.path
-                                            initial={{ pathLength: 0 }}
-                                            animate={{ pathLength: 1 }}
-                                            transition={{ duration: 1.5, ease: "easeInOut" }}
-                                            d={trendConfig.pathData}
-                                            fill="none"
-                                            stroke="#03e115"
-                                            strokeWidth="3"
-                                            strokeLinecap="round"
-                                        />
-                                        <motion.path
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: 0.5, duration: 1 }}
-                                            d={trendConfig.areaData}
-                                            fill="url(#areaGradient)"
-                                        />
-                                        {/* Numerical Labels for Area Chart */}
-                                        <g>
-                                            {trendConfig.points.map((p, i) => (
-                                                <motion.text
-                                                    key={`label-area-${i}`}
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    transition={{ delay: 1 + i * 0.05 }}
-                                                    x={p.x}
-                                                    y={p.y - 10}
-                                                    textAnchor="middle"
-                                                    fill="#03e115"
-                                                    className="text-[10px] font-black font-mono"
-                                                >
-                                                    {p.value?.toLocaleString()}
-                                                </motion.text>
-                                            ))}
-                                        </g>
-                                    </>
-                                ) : (
-                                    <g>
-                                        {trendConfig.points.map((p, i) => {
-                                            const barWidth = 20;
-                                            const barHeight = trendConfig.height - p.y - trendConfig.padding;
-                                            return (
-                                                <React.Fragment key={`bar-group-${i}`}>
-                                                    <motion.rect
-                                                        initial={{ height: 0, y: trendConfig.height }}
-                                                        animate={{ height: barHeight, y: p.y }}
-                                                        transition={{ delay: i * 0.05, duration: 0.5 }}
-                                                        x={p.x - barWidth / 2}
-                                                        width={barWidth}
-                                                        rx="4"
-                                                        fill="#03e115"
-                                                        fillOpacity={0.4 + (i / trendConfig.points.length) * 0.6}
-                                                    />
-                                                    <motion.text
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ delay: 0.5 + i * 0.05 }}
-                                                        x={p.x}
-                                                        y={p.y - 8}
-                                                        textAnchor="middle"
-                                                        fill="#03e115"
-                                                        className="text-[9px] font-black font-mono"
-                                                    >
-                                                        {p.value?.toLocaleString()}
-                                                    </motion.text>
-                                                </React.Fragment>
-                                            );
-                                        })}
-                                    </g>
-                                )}
-                            </svg>
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-600 font-bold text-sm">
-                                لا توجد بيانات كافية للرسم البياني
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 2. Tier Distribution Component */}
-                <div className="lg:col-span-4 bg-[#0f0f12] border border-white/5 rounded-[40px] p-8">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">توزيع الفئات</p>
-                            <h3 className="text-xl font-black text-white">عدد العمليات</h3>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl">
-                            <button
-                                onClick={() => setDistType('bars')}
-                                className={`p-2 rounded-lg transition-all ${distType === 'bars' ? 'bg-[#03e115] text-black' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                <BarChart3 size={16} />
-                            </button>
-                            <button
-                                onClick={() => setDistType('pie')}
-                                className={`p-2 rounded-lg transition-all ${distType === 'pie' ? 'bg-[#03e115] text-black' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                <Filter size={16} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="relative min-h-[220px] flex items-center justify-center">
-                        {distType === 'bars' ? (
-                            <div className="space-y-6 w-full">
-                                {['basic', 'medium', 'professional', 'cinematic', 'legendary'].map((tier) => {
-                                    const item = data.distribution.find(d => d.tier === tier);
-                                    const count = item?.count || 0;
-                                    const maxCount = Math.max(...data.distribution.map(d => d.count), 1);
-                                    const percentage = (count / maxCount) * 100;
-
-                                    return (
-                                        <div key={tier} className="space-y-2">
-                                            <div className="flex items-center justify-between text-xs font-black">
-                                                <span className="text-gray-400 capitalize">{tier}</span>
-                                                <span className="text-white">{count}</span>
-                                            </div>
-                                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${percentage}%` }}
-                                                    transition={{ duration: 1, ease: "easeOut" }}
-                                                    className="h-full rounded-full"
-                                                    style={{ backgroundColor: TIER_COLORS[tier] }}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="relative w-48 h-48">
-                                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(3,225,21,0.1)]">
-                                    <defs>
-                                        {['basic', 'medium', 'professional', 'cinematic', 'legendary'].map(tier => (
-                                            <radialGradient key={`grad-${tier}`} id={`grad-${tier}`} cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                                                <stop offset="0%" stopColor={TIER_COLORS[tier]} stopOpacity="0.8" />
-                                                <stop offset="100%" stopColor={TIER_COLORS[tier]} stopOpacity="1" />
-                                            </radialGradient>
-                                        ))}
-                                    </defs>
-                                    {pieData.filter(s => s.percentage > 0).map((slice, i) => {
-                                        const x1 = 50 + 40 * Math.cos(slice.startAngle);
-                                        const y1 = 50 + 40 * Math.sin(slice.startAngle);
-                                        const x2 = 50 + 40 * Math.cos(slice.endAngle);
-                                        const y2 = 50 + 40 * Math.sin(slice.endAngle);
-
-                                        const largeArc = slice.percentage > 0.5 ? 1 : 0;
-                                        const d = `M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-                                        // Label position (mid-angle)
-                                        const midAngle = (slice.startAngle + slice.endAngle) / 2;
-                                        const lx = 50 + 30 * Math.cos(midAngle);
-                                        const ly = 50 + 30 * Math.sin(midAngle);
-
-                                        return (
-                                            <g key={slice.tier}>
-                                                <motion.path
-                                                    initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-                                                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 100,
-                                                        damping: 10,
-                                                        delay: i * 0.1
-                                                    }}
-                                                    d={d}
-                                                    fill={`url(#grad-${slice.tier})`}
-                                                    className="hover:brightness-110 transition-all cursor-pointer"
-                                                    stroke="#0f0f12"
-                                                    strokeWidth="1.5"
-                                                />
-                                                {slice.percentage > 0.05 && (
-                                                    <motion.text
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ delay: 0.5 + i * 0.1 }}
-                                                        x={lx}
-                                                        y={ly}
-                                                        textAnchor="middle"
-                                                        fill="white"
-                                                        className="text-[5px] font-black pointer-events-none drop-shadow-md rotate-90"
-                                                    >
-                                                        {slice.count}
-                                                    </motion.text>
-                                                )}
-                                            </g>
-                                        );
-                                    })}
-                                    <circle cx="50" cy="50" r="22" fill="#0f0f12" className="shadow-inner" />
-                                    <circle cx="50" cy="50" r="20" fill="#0a0a0a" />
-                                </svg>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <span className="text-[10px] font-black text-gray-500 uppercase">الإجمالي</span>
-                                    <span className="text-xl font-black text-white">
-                                        {data.distribution.reduce((acc, d) => acc + d.count, 0)}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+function DataTable({ title, rows, currency }: { title: string; rows: { k: string; total: number; count: number }[]; currency?: string }) {
+    return (
+        <div>
+            <h3 className="mb-2 text-sm font-bold text-ink-muted">{title}</h3>
+            <div className="max-h-72 overflow-auto rounded-2xl border border-line">
+                <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-surface-raised text-xs text-ink-faint">
+                        <tr>
+                            <th className="p-3 text-right font-bold">البند</th>
+                            <th className="p-3 text-right font-bold">المبلغ</th>
+                            <th className="p-3 text-right font-bold">العمليات</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                        {rows.map((r) => (
+                            <tr key={r.k}>
+                                <td className="p-3 font-semibold">{r.k}</td>
+                                <td className="p-3 tabular-nums" dir="ltr" style={{ textAlign: 'right' }}>{formatAmount(r.total, currency)}</td>
+                                <td className="p-3 tabular-nums">{r.count}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
-};
-
-export default AnalyticsSection;
+}

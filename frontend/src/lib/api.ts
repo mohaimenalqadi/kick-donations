@@ -1,311 +1,166 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { DIRECT_API_URL } from './config';
+import type {
+    ActivityEntry, Analytics, Donation, DonationStatus, Paginated, Presence, PublicSettings, Role, Stats, Tier, User,
+    OverlayDonation,
+} from './types';
 
-interface ApiError {
-    error: string;
-    details?: string[];
+/** Error carrying the HTTP status and the backend's machine-readable code. */
+export class ApiError extends Error {
+    constructor(message: string, public status: number, public code?: string) {
+        super(message);
+        this.name = 'ApiError';
+    }
 }
 
-interface LoginResponse {
-    success: boolean;
-    user: {
-        id: string;
-        username: string;
-        role: string;
+type Query = Record<string, string | number | boolean | undefined | null>;
+
+function qs(params?: Query) {
+    if (!params) return '';
+    const s = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null && v !== '') s.set(k, String(v));
+    const str = s.toString();
+    return str ? `?${str}` : '';
+}
+
+interface RequestOptions {
+    method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+    body?: unknown;
+    query?: Query;
+    headers?: Record<string, string>;
+    base?: string;
+}
+
+async function request<T>(path: string, { method = 'GET', body, query, headers = {}, base = '' }: RequestOptions = {}): Promise<T> {
+    const init: RequestInit = {
+        method,
+        credentials: base ? 'omit' : 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            // Required by the backend CSRF guard for every non-GET request.
+            'X-Requested-With': 'XMLHttpRequest',
+            ...headers,
+        },
     };
-    token: string;
-}
-
-interface Donation {
-    id: string;
-    donor_name: string;
-    amount: number;
-    message: string;
-    tier: 'basic' | 'medium' | 'professional' | 'cinematic' | 'legendary';
-    status: 'pending' | 'live' | 'done';
-    created_at: string;
-    displayed_at?: string;
-}
-
-interface DonationsResponse {
-    donations: Donation[];
-    count: number;
-    connections: {
-        adminCount: number;
-        overlayCount: number;
-        total: number;
-    };
-}
-
-class ApiClient {
-    private baseUrl: string;
-    private token: string | null = null;
-
-    constructor() {
-        this.baseUrl = API_URL;
-        // Load token from localStorage if available
-        if (typeof window !== 'undefined') {
-            this.token = localStorage.getItem('auth_token');
-        }
+    if (body instanceof FormData) {
+        init.body = body;
+    } else if (body !== undefined) {
+        (init.headers as Record<string, string>)['Content-Type'] = 'application/json';
+        init.body = JSON.stringify(body);
     }
 
-    setToken(token: string) {
-        this.token = token;
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('auth_token', token);
-        }
+    let res: Response;
+    try {
+        res = await fetch(`${base}/api${path}${qs(query)}`, init);
+    } catch {
+        throw new ApiError('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.', 0, 'NETWORK');
     }
 
-    clearToken() {
-        this.token = null;
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth_token');
-        }
-    }
-
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<T> {
-        const url = `${this.baseUrl}${endpoint}`;
-        console.log(`[ApiClient] Request: ${options.method || 'GET'} ${url}`);
-
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json',
-            ...(options.headers as Record<string, string>),
-        };
-
-        if (this.token) {
-            (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
-        }
-
-        const isBodyMethod = ['POST', 'PATCH', 'PUT'].includes(options.method || '');
-        const body = options.body || (isBodyMethod ? JSON.stringify({}) : undefined);
-
+    const text = await res.text();
+    let data: unknown = null;
+    if (text) {
         try {
-            const response = await fetch(url, {
-                ...options,
-                headers,
-                body,
-                credentials: 'include',
-            });
-
-            console.log(`[ApiClient] Status: ${response.status} ${response.statusText}`);
-
-            const responseText = await response.text();
-            console.log(`[ApiClient] Raw Response:`, responseText);
-
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (e) {
-                console.error(`[ApiClient] JSON Parse Error:`, e);
-                throw new Error('فشل تحليل استجابة الخادم (Format Error)');
-            }
-
-            if (!response.ok) {
-                throw new Error((data as ApiError).error || 'حدث خطأ غير متوقع');
-            }
-
-            return data as T;
-        } catch (error: any) {
-            console.error(`[ApiClient] Fetch Error:`, error);
-            throw error;
+            data = JSON.parse(text);
+        } catch {
+            throw new ApiError('استجابة غير متوقعة من الخادم', res.status, 'BAD_RESPONSE');
         }
     }
 
-    // Auth endpoints
-    async login(username: string, password: string): Promise<LoginResponse> {
-        const response = await this.request<LoginResponse>('/api/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password }),
-        });
-
-        if (response.token) {
-            this.setToken(response.token);
-        }
-
-        return response;
+    if (!res.ok) {
+        const d = (data || {}) as { error?: string; code?: string };
+        throw new ApiError(d.error || 'حدث خطأ غير متوقع', res.status, d.code);
     }
-
-    async logout(): Promise<void> {
-        await this.request('/api/auth/logout', { method: 'POST' });
-        this.clearToken();
-    }
-
-    async getCurrentUser() {
-        return this.request<{ user: LoginResponse['user'] }>('/api/auth/me');
-    }
-
-    async updateProfile(data: { username?: string; password?: string }): Promise<LoginResponse> {
-        const response = await this.request<LoginResponse>('/api/auth/profile', {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-
-        if (response.token) {
-            this.setToken(response.token);
-        }
-
-        return response;
-    }
-
-    async setup(username: string, password: string) {
-        return this.request('/api/auth/setup', {
-            method: 'POST',
-            body: JSON.stringify({ username, password }),
-        });
-    }
-
-    // User management endpoints
-    async getUsers(): Promise<{ users: any[] }> {
-        return this.request('/api/users');
-    }
-
-    async createUser(data: { username: string; password: string; role: string }): Promise<{ success: boolean; user: any }> {
-        return this.request('/api/users', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async updateUser(id: string, data: { password?: string; role?: string }): Promise<{ success: boolean; user: any }> {
-        return this.request(`/api/users/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async deleteUser(id: string): Promise<{ success: boolean }> {
-        return this.request(`/api/users/${id}`, {
-            method: 'DELETE',
-        });
-    }
-
-    // Donation endpoints
-    async getDonations(status?: string): Promise<DonationsResponse> {
-        const query = status ? `?status=${status}` : '';
-        return this.request<DonationsResponse>(`/api/donations${query}`);
-    }
-
-    async getQueue(): Promise<{ queue: Donation[] }> {
-        return this.request<{ queue: Donation[] }>('/api/donations/queue');
-    }
-
-    async getLatest(): Promise<{ latest: Donation | null }> {
-        return this.request<{ latest: Donation | null }>('/api/donations/latest');
-    }
-
-    async createDonation(data: {
-        donor_name: string;
-        amount: number;
-        message?: string;
-    }): Promise<{ success: boolean; donation: Donation }> {
-        return this.request('/api/donations', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async sendToStream(donationId: string): Promise<{ success: boolean; donation: Donation }> {
-        return this.request(`/api/donations/${donationId}/send`, {
-            method: 'POST',
-        });
-    }
-
-    async updateStatus(donationId: string, status: string): Promise<{ success: boolean }> {
-        return this.request(`/api/donations/${donationId}/status`, {
-            method: 'PATCH',
-            body: JSON.stringify({ status }),
-        });
-    }
-
-    async deleteDonation(donationId: string): Promise<{ success: boolean }> {
-        return this.request(`/api/donations/${donationId}`, {
-            method: 'DELETE',
-        });
-    }
-
-    async bulkDeleteDonations(period: 'today' | 'all'): Promise<{ success: boolean; message: string }> {
-        return this.request(`/api/donations/bulk?period=${period}`, {
-            method: 'DELETE',
-        });
-    }
-
-    async getTopDonor(): Promise<{ top: { donor_name: string; amount: number } | null }> {
-        return this.request('/api/donations/top');
-    }
-
-    async getAnalytics(start?: string, end?: string): Promise<{
-        dailyTrend: { date: string; total: number }[];
-        distribution: { tier: string; count: number }[];
-    }> {
-        const query = (start && end) ? `?start=${start}&end=${end}` : '';
-        return this.request(`/api/donations/analytics${query}`);
-    }
-
-    async getStats(): Promise<{
-        today: { total: number; count: number; average: number };
-        connections: { adminCount: number; overlayCount: number };
-    }> {
-        return this.request('/api/donations/stats');
-    }
-
-    // Settings endpoints
-    async getSettings(): Promise<{
-        settings: {
-            site_title: string;
-            currency: string;
-            tts_enabled: boolean;
-            tts_voice: string;
-            mute_overlay: boolean;
-        }
-    }> {
-        return this.request('/api/settings');
-    }
-
-    async updateSettings(data: {
-        site_title?: string;
-        currency?: string;
-        tts_enabled?: boolean;
-        tts_voice?: string;
-        mute_overlay?: boolean;
-    }): Promise<{ success: boolean; settings: any }> {
-        return this.request('/api/settings', {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
-
-    // Tier Settings
-    async getTierSettings(): Promise<{
-        tiers: {
-            id: string;
-            tier_key: string;
-            label: string;
-            min_amount: number;
-            sound_url: string;
-            background_url: string;
-            duration: number;
-            color: string;
-        }[]
-    }> {
-        return this.request('/api/tier-settings');
-    }
-
-    async updateTierSetting(id: string, data: {
-        label?: string;
-        min_amount?: number;
-        sound_url?: string;
-        background_url?: string;
-        duration?: number;
-        color?: string;
-    }): Promise<{ success: boolean; tier: any }> {
-        return this.request(`/api/tier-settings/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
+    return data as T;
 }
 
-export const api = new ApiClient();
-export type { Donation, DonationsResponse, LoginResponse };
+export interface DonationFilters {
+    page?: number;
+    limit?: number;
+    status?: DonationStatus;
+    tier?: string;
+    search?: string;
+    flagged?: boolean;
+    from?: string;
+    to?: string;
+}
+
+export const api = {
+    // ---- auth ----
+    login: (username: string, password: string) =>
+        request<{ success: true; user: User }>('/auth/login', { method: 'POST', body: { username, password } }),
+    setup: (username: string, password: string) =>
+        request<{ success: true }>('/auth/setup', { method: 'POST', body: { username, password } }),
+    logout: () => request<{ success: true }>('/auth/logout', { method: 'POST' }),
+    logoutAll: () => request<{ success: true }>('/auth/logout-all', { method: 'POST' }),
+    me: () => request<{ user: User }>('/auth/me'),
+    socketTicket: () => request<{ ticket: string }>('/auth/socket-ticket'),
+    updateProfile: (data: { current_password: string; username?: string; password?: string }) =>
+        request<{ success: true; user: User }>('/auth/profile', { method: 'PATCH', body: data }),
+
+    // ---- public ----
+    branding: () => request<{ site_title: string; currency: string }>('/public/branding'),
+
+    // ---- users ----
+    users: () => request<{ users: User[] }>('/users'),
+    createUser: (data: { username: string; password: string; role: Role }) =>
+        request<{ success: true; user: User }>('/users', { method: 'POST', body: data }),
+    updateUser: (id: string, data: { password?: string; role?: Role }) =>
+        request<{ success: true; user: User }>(`/users/${id}`, { method: 'PATCH', body: data }),
+    revokeUserSessions: (id: string) => request<{ success: true }>(`/users/${id}/revoke-sessions`, { method: 'POST' }),
+    deleteUser: (id: string) => request<{ success: true }>(`/users/${id}`, { method: 'DELETE' }),
+
+    // ---- donations ----
+    donations: (filters: DonationFilters = {}) =>
+        request<Paginated<Donation> & { connections: Presence }>('/donations', { query: filters as Query }),
+    createDonation: (data: { donor_name: string; amount: number; message?: string }) =>
+        request<{ success: true; donation: Donation }>('/donations', { method: 'POST', body: data }),
+    sendDonation: (id: string) => request<{ success: true; donation: Donation }>(`/donations/${id}/send`, { method: 'POST' }),
+    originalMessage: (id: string) =>
+        request<{ original: { donor_name?: string; message?: string } | null }>(`/donations/${id}/original`),
+    approveDonation: (id: string) => request<{ success: true; donation: Donation }>(`/donations/${id}/approve`, { method: 'POST' }),
+    deleteDonation: (id: string) => request<{ success: true }>(`/donations/${id}`, { method: 'DELETE' }),
+    bulkDelete: (period: 'today' | 'all') =>
+        request<{ success: true; message: string; deleted: number }>('/donations/bulk', { method: 'DELETE', query: { period } }),
+    stats: () => request<{ stats: Stats; connections: Presence }>('/donations/stats'),
+    analytics: (start?: string, end?: string) => request<Analytics>('/donations/analytics', { query: { start, end } }),
+
+    // ---- settings ----
+    settings: () => request<{ settings: PublicSettings }>('/settings'),
+    updateSettings: (data: Partial<PublicSettings>) =>
+        request<{ success: true; settings: PublicSettings }>('/settings', { method: 'PATCH', body: data }),
+    tiers: () => request<{ tiers: Tier[] }>('/tier-settings'),
+    updateTier: (id: string, data: Partial<Omit<Tier, 'id' | 'tier_key'>>) =>
+        request<{ success: true; tier: Tier }>(`/tier-settings/${id}`, { method: 'PATCH', body: data }),
+
+    // ---- overlay control ----
+    overlayKey: () => request<{ key: string | null }>('/overlay/key'),
+    rotateOverlayKey: () => request<{ success: true; key: string }>('/overlay/key/rotate', { method: 'POST' }),
+    overlayStatus: () => request<Presence>('/overlay/status'),
+    overlaySkip: () => request<{ success: true }>('/overlay/skip', { method: 'POST' }),
+    overlayTest: (tier_key: string) => request<{ success: true }>('/overlay/test', { method: 'POST', body: { tier_key } }),
+
+    // ---- overlay (OBS page, authenticated by overlay key) ----
+    overlayBootstrap: (key: string) =>
+        request<{ settings: PublicSettings; tiers: Tier[]; queue: OverlayDonation[]; top: { donor_name: string; amount: number } | null }>(
+            '/overlay/bootstrap',
+            { headers: { 'X-Overlay-Key': key } }
+        ),
+    overlayTop: (key: string) =>
+        request<{ top: { donor_name: string; amount: number } | null }>('/overlay/top', { headers: { 'X-Overlay-Key': key } }),
+
+    // ---- audit ----
+    activity: (params: { page?: number; limit?: number; action?: string } = {}) =>
+        request<{ items: ActivityEntry[]; total: number }>('/activity-logs', { query: params }),
+
+    // ---- uploads (direct to API with a short-lived ticket) ----
+    async upload(file: File): Promise<{ url: string; type: string }> {
+        const { ticket } = await request<{ ticket: string }>('/auth/upload-ticket');
+        const form = new FormData();
+        form.append('file', file);
+        return request('/uploads', {
+            method: 'POST',
+            body: form,
+            base: DIRECT_API_URL,
+            headers: { Authorization: `Bearer ${ticket}` },
+        });
+    },
+};

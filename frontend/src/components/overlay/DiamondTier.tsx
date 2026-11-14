@@ -50,8 +50,8 @@ export default function DiamondTier({
 
     useEffect(() => {
         const alertSound = soundUrl || ALERT_ASSETS.LEGENDARY;
-        audioManager.preload('diamond_alert', alertSound);
-        audioManager.play('diamond_alert', { volume: (volume / 100) });
+        audioManager.preload(alertSound);
+        audioManager.play(alertSound, { volume: (volume / 100) });
 
         // Phase 1: Diamond Glow Buildup (8s)
         const glowTimer = setTimeout(() => setShowGlow(true), 8000);
@@ -66,7 +66,7 @@ export default function DiamondTier({
         }, 6000);
 
         return () => {
-            audioManager.stop('diamond_alert');
+            audioManager.stop(alertSound);
             clearTimeout(glowTimer);
             clearTimeout(nameTimer);
             clearTimeout(amountTimer);
@@ -173,7 +173,7 @@ export default function DiamondTier({
                                 className="max-w-[90vw]"
                             >
                                 <p className="text-[clamp(1.8rem,4.5vw,5rem)] font-bold text-white/95 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] break-words">
-                                    "{message}"
+                                    &ldquo;{message}&rdquo;
                                 </p>
                             </motion.div>
                         )}

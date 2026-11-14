@@ -1,267 +1,232 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ShieldCheck,
-    UserPlus,
-    Trash2,
-    Key,
-    User,
-    AlertCircle,
-    CheckCircle,
-    UserCircle,
-    BadgeCheck
-} from 'lucide-react';
-import { api } from '@/lib/api';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { KeyRound, LogOut, ShieldCheck, Trash2, UserPlus, Users } from 'lucide-react';
+import { api } from '@/lib/api';
+import { qk } from '@/hooks/queries';
+import { formatDateTime } from '@/lib/format';
+import type { Role, User } from '@/lib/types';
+import { useDashboard } from '../DashboardContext';
+import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+import Modal from '@/components/ui/Modal';
+import { EmptyState, SectionHeader, Spinner } from '@/components/ui/primitives';
+
+const ROLE_LABEL: Record<Role, string> = { admin: 'مشرف', moderator: 'مشرف مساعد' };
 
 export default function ResponsibilitiesPage() {
+    const { user: me, isAdmin } = useDashboard();
     const router = useRouter();
-    const [users, setUsers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [userRole, setUserRole] = useState<string | null>(null);
-
-    // Form state
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('moderator');
-
-    const fetchUsers = async () => {
-        try {
-            const data = await api.getUsers();
-            setUsers(data.users);
-        } catch (err: any) {
-            console.error('Error fetching users:', err);
-            setError(err.message || 'خطأ في جلب المستخدمين');
-        }
-    };
+    const qc = useQueryClient();
+    const toast = useToast();
+    const confirm = useConfirm();
+    const [resetFor, setResetFor] = useState<User | null>(null);
 
     useEffect(() => {
-        const checkAccess = async () => {
-            try {
-                const res = await api.getCurrentUser();
-                if (res.user.role !== 'admin') {
-                    router.push('/dashboard');
-                    return;
-                }
-                setUserRole(res.user.role);
-                await fetchUsers();
-            } catch (err) {
-                router.push('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (!isAdmin) router.replace('/dashboard');
+    }, [isAdmin, router]);
 
-        checkAccess();
-    }, [router]);
+    const users = useQuery({ queryKey: qk.users, queryFn: () => api.users().then((r) => r.users), enabled: isAdmin });
+    const refresh = () => qc.invalidateQueries({ queryKey: qk.users });
 
-    const handleCreateUser = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-        setSubmitting(true);
+    const updateRole = useMutation({
+        mutationFn: ({ id, role }: { id: string; role: Role }) => api.updateUser(id, { role }),
+        onSuccess: () => { toast.success('تم تحديث الصلاحية'); refresh(); },
+        onError: toast.error,
+    });
 
+    async function remove(u: User) {
+        if (!(await confirm({ title: `حذف "${u.username}"`, description: 'سيفقد هذا المستخدم الوصول إلى لوحة التحكم فوراً.', confirmLabel: 'حذف المستخدم' }))) return;
         try {
-            await api.createUser({ username, password, role });
-            setSuccess('تم إنشاء المستخدم بنجاح');
+            await api.deleteUser(u.id);
+            toast.success('تم حذف المستخدم');
+            refresh();
+        } catch (err) {
+            toast.error(err);
+        }
+    }
+
+    async function revoke(u: User) {
+        if (!(await confirm({ title: 'إنهاء الجلسات', description: `سيتم تسجيل خروج "${u.username}" من كل الأجهزة.`, confirmLabel: 'إنهاء الجلسات', tone: 'default' }))) return;
+        try {
+            await api.revokeUserSessions(u.id);
+            toast.success('تم إنهاء جلسات المستخدم');
+        } catch (err) {
+            toast.error(err);
+        }
+    }
+
+    if (!isAdmin) return null;
+
+    return (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-4">
+                <CreateUserForm onCreated={refresh} />
+            </div>
+
+            <section className="card p-4 sm:p-6 lg:col-span-8" aria-labelledby="team-title">
+                <SectionHeader title="فريق الإدارة" description={users.data ? `${users.data.length} مستخدم` : undefined} />
+                <div className="mb-4 grid gap-2 text-xs text-ink-muted sm:grid-cols-2">
+                    <p className="rounded-xl bg-white/[0.03] p-3"><b className="text-ink">مشرف:</b> صلاحيات كاملة، الإعدادات، المستخدمون، الحذف.</p>
+                    <p className="rounded-xl bg-white/[0.03] p-3"><b className="text-ink">مشرف مساعد:</b> إضافة التبرعات وإرسالها للبث فقط.</p>
+                </div>
+                {users.isLoading ? (
+                    <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-16" />)}</div>
+                ) : !users.data?.length ? (
+                    <EmptyState icon={Users} title="لا يوجد مستخدمون" />
+                ) : (
+                    <ul className="divide-y divide-line">
+                        {users.data.map((u) => {
+                            const self = u.id === me.id;
+                            return (
+                                <li key={u.id} className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center">
+                                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-black ${u.role === 'admin' ? 'bg-brand-soft text-brand' : 'bg-info-soft text-info'}`}>
+                                            {u.username[0]?.toUpperCase()}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate font-bold" dir="ltr" style={{ textAlign: 'right' }}>
+                                                {u.username} {self && <span className="text-xs font-semibold text-ink-faint">(أنت)</span>}
+                                            </p>
+                                            <p className="text-[11px] text-ink-faint">أُنشئ {formatDateTime(u.created_at)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                                        <select
+                                            className="input w-auto py-2 text-xs"
+                                            value={u.role}
+                                            disabled={self || updateRole.isPending}
+                                            onChange={(e) => updateRole.mutate({ id: u.id, role: e.target.value as Role })}
+                                            aria-label={`صلاحية ${u.username}`}
+                                        >
+                                            <option value="admin">{ROLE_LABEL.admin}</option>
+                                            <option value="moderator">{ROLE_LABEL.moderator}</option>
+                                        </select>
+                                        <button className="btn-ghost btn-sm p-2" onClick={() => setResetFor(u)} title="تعيين كلمة مرور جديدة" aria-label={`تعيين كلمة مرور ${u.username}`}>
+                                            <KeyRound size={15} />
+                                        </button>
+                                        {!self && (
+                                            <>
+                                                <button className="btn-ghost btn-sm p-2" onClick={() => revoke(u)} title="إنهاء الجلسات" aria-label={`إنهاء جلسات ${u.username}`}>
+                                                    <LogOut size={15} />
+                                                </button>
+                                                <button className="btn-ghost btn-sm p-2 hover:bg-danger-soft hover:text-danger" onClick={() => remove(u)} aria-label={`حذف ${u.username}`}>
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </section>
+
+            <ResetPasswordModal user={resetFor} onClose={() => setResetFor(null)} />
+        </div>
+    );
+}
+
+function CreateUserForm({ onCreated }: { onCreated: () => void }) {
+    const toast = useToast();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState<Role>('moderator');
+    const validName = /^[A-Za-z0-9_.-]{3,30}$/.test(username.trim());
+
+    const create = useMutation({
+        mutationFn: () => api.createUser({ username: username.trim(), password, role }),
+        onSuccess: () => {
+            toast.success('تم إنشاء المستخدم');
             setUsername('');
             setPassword('');
             setRole('moderator');
-            await fetchUsers();
-        } catch (err: any) {
-            setError(err.message || 'خطأ في إنشاء المستخدم');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleDeleteUser = async (id: string, name: string) => {
-        if (!confirm(`هل أنت متأكد من حذف المستخدم "${name}"؟`)) return;
-
-        try {
-            await api.deleteUser(id);
-            setSuccess('تم حذف المستخدم');
-            await fetchUsers();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
-    if (loading) return null;
+            onCreated();
+        },
+        onError: toast.error,
+    });
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row gap-10">
-                {/* Create User Form */}
-                <div className="w-full md:w-1/3">
-                    <div className="bg-[#0f0f12] border border-white/5 rounded-[40px] p-8 lg:p-10 sticky top-8">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-black text-white">إضافة مسؤول</h2>
-                            <div className="w-10 h-10 bg-[#03e115]/10 rounded-full flex items-center justify-center text-[#03e115]">
-                                <UserPlus size={20} />
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleCreateUser} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-2">اسم المستخدم</label>
-                                <div className="relative">
-                                    <User className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                                    <input
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pr-12 text-white font-bold focus:outline-none focus:border-[#03e115]/30 transition-all"
-                                        placeholder="اسم المستخدم الجديد..."
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-2">كلمة المرور</label>
-                                <div className="relative">
-                                    <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pr-12 text-white font-bold focus:outline-none focus:border-[#03e115]/30 transition-all"
-                                        placeholder="كلمة مرور قوية..."
-                                        required
-                                        minLength={6}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-2">الصلاحية</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('moderator')}
-                                        className={`py-4 rounded-2xl font-black text-xs uppercase tracking-widest border transition-all ${role === 'moderator'
-                                                ? 'bg-[#03e115]/10 border-[#03e115] text-[#03e115]'
-                                                : 'bg-white/5 border-white/10 text-gray-500'
-                                            }`}
-                                    >
-                                        مشرف
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setRole('admin')}
-                                        className={`py-4 rounded-2xl font-black text-xs uppercase tracking-widest border transition-all ${role === 'admin'
-                                                ? 'bg-blue-500/10 border-blue-500 text-blue-500'
-                                                : 'bg-white/5 border-white/10 text-gray-500'
-                                            }`}
-                                    >
-                                        مسؤول
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full bg-[#03e115] text-[#0a0a0a] py-5 rounded-[24px] font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#03e115]/20 disabled:opacity-50"
-                            >
-                                {submitting ? (
-                                    <div className="w-6 h-6 border-4 border-[#0a0a0a]/30 border-t-[#0a0a0a] rounded-full animate-spin" />
-                                ) : (
-                                    <>
-                                        <BadgeCheck size={20} />
-                                        <span>تفعيل العضوية</span>
-                                    </>
-                                )}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {/* Users List */}
-                <div className="flex-1 space-y-6">
-                    <div className="flex items-center justify-between px-4">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-2xl font-black text-white">فريق العمل</h2>
-                            <span className="bg-white/5 px-4 py-1.5 rounded-full text-xs font-black text-gray-500 border border-white/5">
-                                {users.length} مستخدم
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                        <AnimatePresence mode="popLayout">
-                            {users.map((u, i) => (
-                                <motion.div
-                                    key={u.id}
-                                    layout
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="bg-[#0f0f12] border border-white/5 rounded-[32px] p-6 flex items-center justify-between group hover:border-white/10 transition-all"
-                                >
-                                    <div className="flex items-center gap-5">
-                                        <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center font-black text-2xl border ${u.role === 'admin'
-                                                ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
-                                                : 'bg-[#03e115]/10 border-[#03e115]/20 text-[#03e115]'
-                                            }`}>
-                                            {u.username[0].toUpperCase()}
-                                        </div>
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="text-lg font-black text-white">{u.username}</h3>
-                                                <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${u.role === 'admin'
-                                                        ? 'bg-blue-500/10 text-blue-500'
-                                                        : 'bg-[#03e115]/10 text-[#03e115]'
-                                                    }`}>
-                                                    <ShieldCheck size={10} />
-                                                    {u.role === 'admin' ? 'ADMIN' : 'MODERATOR'}
-                                                </div>
-                                            </div>
-                                            <p className="text-xs font-bold text-gray-500">
-                                                تم الإنشاء في {new Date(u.created_at).toLocaleDateString('ar-LY')}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        <button
-                                            onClick={() => handleDeleteUser(u.id, u.username)}
-                                            className="w-12 h-12 bg-red-400/5 hover:bg-red-400 text-red-400 hover:text-white border border-red-400/10 rounded-2xl transition-all flex items-center justify-center group/btn"
-                                            disabled={u.role === 'admin' && users.filter(usr => usr.role === 'admin').length === 1}
-                                        >
-                                            <Trash2 size={18} className="group-hover/btn:scale-110 transition-transform" />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                </div>
+        <form
+            className="card p-5 sm:p-6 lg:sticky lg:top-6"
+            onSubmit={(e) => {
+                e.preventDefault();
+                create.mutate();
+            }}
+        >
+            <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-lg font-black">إضافة مسؤول</h2>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-brand"><UserPlus size={18} /></span>
             </div>
+            <div className="space-y-4">
+                <div>
+                    <label htmlFor="new-username" className="label">اسم المستخدم</label>
+                    <input id="new-username" className="input" dir="ltr" autoComplete="off" value={username} onChange={(e) => setUsername(e.target.value)} maxLength={30} required />
+                    <p className="hint">3–30 حرفاً: إنجليزية وأرقام و . _ -</p>
+                </div>
+                <div>
+                    <label htmlFor="new-password" className="label">كلمة المرور</label>
+                    <input id="new-password" type="password" className="input" dir="ltr" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                    <p className="hint">8 أحرف على الأقل</p>
+                </div>
+                <div>
+                    <span className="label">الصلاحية</span>
+                    <div className="grid grid-cols-2 gap-2" role="radiogroup">
+                        {(['moderator', 'admin'] as Role[]).map((r) => (
+                            <button
+                                type="button"
+                                key={r}
+                                role="radio"
+                                aria-checked={role === r}
+                                onClick={() => setRole(r)}
+                                className={`flex items-center justify-center gap-2 rounded-2xl border p-3 text-sm font-bold transition-colors ${role === r ? 'border-brand/40 bg-brand-soft text-brand' : 'border-line text-ink-muted hover:text-ink'}`}
+                            >
+                                <ShieldCheck size={15} /> {ROLE_LABEL[r]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <button className="btn-primary w-full" disabled={!validName || password.length < 8 || create.isPending}>
+                    {create.isPending ? <Spinner size={16} className="text-brand-ink" /> : <UserPlus size={16} />} إنشاء الحساب
+                </button>
+            </div>
+        </form>
+    );
+}
 
-            {/* Notification Toast */}
-            <AnimatePresence>
-                {(error || success) && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50, x: '-50%' }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className={`fixed bottom-12 left-1/2 z-[100] px-8 py-4 rounded-3xl font-black shadow-2xl flex items-center gap-4 ${error ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-[#03e115] text-[#0a0a0a] shadow-[#03e115]/20'
-                            }`}
-                    >
-                        {error ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
-                        <span>{error || success}</span>
-                        <button onClick={() => { setError(''); setSuccess(''); }} className="mr-4 opacity-50 hover:opacity-100">×</button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+function ResetPasswordModal({ user, onClose }: { user: User | null; onClose: () => void }) {
+    const toast = useToast();
+    const [pw, setPw] = useState('');
+    const save = useMutation({
+        mutationFn: () => api.updateUser(user!.id, { password: pw }),
+        onSuccess: () => {
+            toast.success('تم تعيين كلمة المرور وإنهاء جلسات المستخدم');
+            setPw('');
+            onClose();
+        },
+        onError: toast.error,
+    });
+
+    return (
+        <Modal
+            open={!!user}
+            onClose={() => { setPw(''); onClose(); }}
+            title={`كلمة مرور جديدة لـ ${user?.username ?? ''}`}
+            description="سيتم تسجيل خروج المستخدم من كل الأجهزة."
+            footer={
+                <>
+                    <button className="btn-primary" disabled={pw.length < 8 || save.isPending} onClick={() => save.mutate()}>
+                        {save.isPending && <Spinner size={16} className="text-brand-ink" />} حفظ
+                    </button>
+                    <button className="btn-secondary" onClick={onClose}>إلغاء</button>
+                </>
+            }
+        >
+            <label htmlFor="reset-pw" className="label">كلمة المرور الجديدة</label>
+            <input id="reset-pw" type="password" className="input" dir="ltr" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} minLength={8} data-autofocus />
+        </Modal>
     );
 }

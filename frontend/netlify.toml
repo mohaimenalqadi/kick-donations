@@ -3,19 +3,11 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[[headers]]
-  for = "/overlay"
-  [headers.values]
-    X-Frame-Options = "ALLOWALL"
-    Access-Control-Allow-Origin = "*"
-
-[[headers]]
-  for = "/overlay/*"
-  [headers.values]
-    X-Frame-Options = "ALLOWALL"
-    Access-Control-Allow-Origin = "*"
+# Security headers are defined in next.config.js (headers()).
+# Required environment variables on Netlify:
+#   NEXT_PUBLIC_API_URL = https://<your-backend>.onrender.com   (proxy target, socket, uploads)

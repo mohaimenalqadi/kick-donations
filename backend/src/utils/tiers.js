@@ -1,101 +1,53 @@
-/**
- * Tier calculation utility
- * Determines donation tier based on amount (Libyan Dinar)
- * 6 Tiers: tier1 (1-4), tier2 (5-9), tier3 (10-19), tier4 (20-29), tier5 (30-39), tier6 (40-49)
- */
-
-const TIERS = {
-    tier1: {
-        min: 1,
-        max: 4,
-        duration: 10000,      // 10 seconds
-        label: 'بسيط',
-        color: '#10b981'
-    },
-    tier2: {
-        min: 5,
-        max: 9,
-        duration: 15000,      // 15 seconds
-        label: 'فضي',
-        color: '#3b82f6'
-    },
-    tier3: {
-        min: 10,
-        max: 19,
-        duration: 30000,      // 30 seconds
-        label: 'ذهبي',
-        color: '#f59e0b'
-    },
-    tier4: {
-        min: 20,
-        max: 29,
-        duration: 45000,      // 45 seconds
-        label: 'بلاتيني',
-        color: '#8b5cf6'
-    },
-    tier5: {
-        min: 30,
-        max: 39,
-        duration: 60000,      // 60 seconds
-        label: 'ملكي',
-        color: '#ef4444'
-    },
-    tier6: {
-        min: 40,
-        max: 49,
-        duration: 90000,      // 90 seconds
-        label: 'أسطوري',
-        color: '#e879f9'
-    },
-    tier_50: {
-        min: 50,
-        max: 50,
-        duration: 120000,     // 120 seconds
-        label: 'الخمسين الخارقة',
-        color: '#ff007f'
-    }
-};
+'use strict';
 
 /**
- * Calculate tier based on donation amount
- * @param {number} amount - Donation amount in LYD
- * @returns {object} Tier information
+ * Default tier definitions. These are only used when the `tier_settings`
+ * table is empty or unreachable — the database is the single source of truth.
+ *
+ * `max_amount: null` means "no upper bound". The special 50 LYD tier matches
+ * exactly 50, so 51+ falls back to tier6 (matching the historical behaviour).
  */
-function calculateTier(amount) {
-    const numAmount = parseFloat(amount);
+const DEFAULT_TIERS = Object.freeze([
+    { tier_key: 'tier1', label: 'بسيط', min_amount: 1, max_amount: null, duration: 10000, color: '#10b981', volume: 80 },
+    { tier_key: 'tier2', label: 'فضي', min_amount: 5, max_amount: null, duration: 15000, color: '#3b82f6', volume: 80 },
+    { tier_key: 'tier3', label: 'ذهبي', min_amount: 10, max_amount: null, duration: 30000, color: '#f59e0b', volume: 80 },
+    { tier_key: 'tier4', label: 'بلاتيني', min_amount: 20, max_amount: null, duration: 45000, color: '#8b5cf6', volume: 80 },
+    { tier_key: 'tier5', label: 'ملكي', min_amount: 30, max_amount: null, duration: 60000, color: '#ef4444', volume: 80 },
+    { tier_key: 'tier6', label: 'أسطوري', min_amount: 40, max_amount: null, duration: 90000, color: '#e879f9', volume: 80 },
+    { tier_key: 'tier_50', label: 'الخمسين الخارقة', min_amount: 50, max_amount: 50, duration: 120000, color: '#ff007f', volume: 80 },
+]);
 
-    if (numAmount === 50) {
-        return { name: 'tier_50', ...TIERS.tier_50 };
-    }
-    if (numAmount >= TIERS.tier6.min) {
-        return { name: 'tier6', ...TIERS.tier6 };
-    }
-    if (numAmount >= TIERS.tier5.min) {
-        return { name: 'tier5', ...TIERS.tier5 };
-    }
-    if (numAmount >= TIERS.tier4.min) {
-        return { name: 'tier4', ...TIERS.tier4 };
-    }
-    if (numAmount >= TIERS.tier3.min) {
-        return { name: 'tier3', ...TIERS.tier3 };
-    }
-    if (numAmount >= TIERS.tier2.min) {
-        return { name: 'tier2', ...TIERS.tier2 };
-    }
-    return { name: 'tier1', ...TIERS.tier1 };
+const TIER_KEYS = DEFAULT_TIERS.map((t) => t.tier_key);
+
+/** Normalises a DB row (handles numeric strings and a missing max_amount column). */
+function normalizeTier(row) {
+    const min = Number(row.min_amount);
+    let max = row.max_amount === undefined || row.max_amount === null || row.max_amount === ''
+        ? null
+        : Number(row.max_amount);
+    // Back-compat: before migration 001 there was no max_amount column.
+    if (row.max_amount === undefined && row.tier_key === 'tier_50') max = min;
+    return {
+        ...row,
+        min_amount: min,
+        max_amount: max,
+        duration: Number(row.duration) || 10000,
+        volume: row.volume === undefined || row.volume === null ? 80 : Number(row.volume),
+    };
 }
 
 /**
- * Get display duration based on tier
- * @param {string} tierName - Tier name
- * @returns {number} Duration in milliseconds
+ * Picks the tier for an amount: the highest `min_amount` that the amount
+ * reaches, skipping tiers whose `max_amount` it exceeds.
+ * @param {number} amount
+ * @param {Array<object>} tiers
  */
-function getTierDuration(tierName) {
-    return TIERS[tierName]?.duration || TIERS.tier1.duration;
+function resolveTier(amount, tiers) {
+    const n = Number(amount);
+    const list = (tiers && tiers.length ? tiers : DEFAULT_TIERS).map(normalizeTier);
+    const sorted = [...list].sort((a, b) => b.min_amount - a.min_amount);
+    const match = sorted.find((t) => n >= t.min_amount && (t.max_amount === null || n <= t.max_amount));
+    return match || sorted[sorted.length - 1];
 }
 
-module.exports = {
-    TIERS,
-    calculateTier,
-    getTierDuration
-};
+module.exports = { DEFAULT_TIERS, TIER_KEYS, normalizeTier, resolveTier };

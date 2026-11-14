@@ -1,13 +1,16 @@
 services:
   - type: web
     name: kick-donations-api
-    env: node
+    runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci --omit=dev
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: "20"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_KEY
@@ -15,4 +18,12 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
+        sync: false
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: TRUST_PROXY_HOPS
+        value: "2"
+      - key: TIMEZONE
+        value: Africa/Tripoli
+      - key: SMS_AUTOMATION_KEY
         sync: false

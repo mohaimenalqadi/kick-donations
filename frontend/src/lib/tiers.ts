@@ -1,51 +1,29 @@
-export const TIERS = {
-    tier1: {
-        duration: 10000,
-        label: 'بسيط',
-        color: '#10b981'
-    },
-    tier2: {
-        duration: 15000,
-        label: 'فضي',
-        color: '#3b82f6'
-    },
-    tier3: {
-        duration: 30000,
-        label: 'ذهبي',
-        color: '#f59e0b'
-    },
-    tier4: {
-        duration: 45000,
-        label: 'بلاتيني',
-        color: '#8b5cf6'
-    },
-    tier5: {
-        duration: 60000,
-        label: 'ملكي',
-        color: '#ef4444'
-    },
-    tier6: {
-        duration: 90000,
-        label: 'أسطوري',
-        color: '#e879f9'
-    },
-    tier_50: {
-        duration: 120000,
-        label: 'الخمسين الخارقة',
-        color: '#ff007f'
+import type { Tier } from './types';
+
+/**
+ * Display-only helpers. The server decides a donation's tier; these mirror
+ * its rule so the dashboard can preview the tier while the amount is typed.
+ */
+export function resolveTier(amount: number, tiers: Tier[]): Tier | null {
+    if (!Number.isFinite(amount) || amount <= 0 || !tiers.length) return null;
+    const sorted = [...tiers].sort((a, b) => Number(b.min_amount) - Number(a.min_amount));
+    return (
+        sorted.find(
+            (t) => amount >= Number(t.min_amount) && (t.max_amount === null || t.max_amount === undefined || amount <= Number(t.max_amount))
+        ) || null
+    );
+}
+
+export function tierByKey(tiers: Tier[] | undefined, key: string) {
+    return tiers?.find((t) => t.tier_key === key);
+}
+
+export function rangeLabel(tier: Tier, tiers: Tier[]) {
+    if (tier.max_amount !== null && tier.max_amount !== undefined && Number(tier.max_amount) === Number(tier.min_amount)) {
+        return `${tier.min_amount} بالضبط`;
     }
-} as const;
-
-export type TierName = keyof typeof TIERS;
-
-export function calculateTier(amount: number): { name: TierName; duration: number; color: string; label: string } {
-    const numAmount = Number(amount);
-
-    if (numAmount === 50) return { name: 'tier_50', ...TIERS.tier_50 };
-    if (numAmount >= 40) return { name: 'tier6', ...TIERS.tier6 };
-    if (numAmount >= 30) return { name: 'tier5', ...TIERS.tier5 };
-    if (numAmount >= 20) return { name: 'tier4', ...TIERS.tier4 };
-    if (numAmount >= 10) return { name: 'tier3', ...TIERS.tier3 };
-    if (numAmount >= 5) return { name: 'tier2', ...TIERS.tier2 };
-    return { name: 'tier1', ...TIERS.tier1 };
+    const next = [...tiers]
+        .filter((t) => Number(t.min_amount) > Number(tier.min_amount) && (t.max_amount === null || Number(t.max_amount) !== Number(t.min_amount)))
+        .sort((a, b) => Number(a.min_amount) - Number(b.min_amount))[0];
+    return next ? `${tier.min_amount} – ${Number(next.min_amount) - 0.01}` : `${tier.min_amount}+`;
 }
