@@ -21,7 +21,7 @@ export default function LiveControl({ currency }: { currency?: string }) {
         refetchInterval: 30_000,
     });
     const nowId = presence.nowPlaying?.donationId;
-    const now = live.data?.items.find((d) => d.id === nowId);
+    const now = live.data?.items?.find((d) => d.id === nowId);
     const waiting = Math.max(0, (live.data?.total ?? 0) - (now ? 1 : 0));
 
     const skip = useMutation({
